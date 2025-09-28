@@ -1,30 +1,15 @@
 {
-  "name": "abg-analyser-perplexity",
+  "name": "wmebem-abg-interpreter",
   "version": "2.0.0",
-  "description": "ABG and VBG analyser tool for UK emergency medicine using Perplexity API",
-  "main": "index.js",
+  "description": "WMEBEM ABG/VBG Interpreter Pro - Enhanced with Perplexity AI",
   "scripts": {
-    "dev": "netlify dev",
-    "build": "echo 'No build step required'",
-    "test": "node test.js"
+    "build": "echo 'No build required'"
   },
-  "keywords": [
-    "abg",
-    "vbg",
-    "blood-gas",
-    "emergency-medicine",
-    "uk-nhs",
-    "perplexity-ai"
-  ],
-  "author": "UK Emergency Medicine ABG Tool",
-  "license": "MIT",
   "dependencies": {
     "node-fetch": "^2.6.7"
   },
-  "devDependencies": {
-    "netlify-cli": "^17.0.0"
-  },
+  "devDependencies": {},
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=18.0.0"
   }
 }
