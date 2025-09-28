@@ -1,0 +1,10 @@
+{
+  "name": "wmebem-abg-interpreter",
+  "version": "1.0.0",
+  "description": "WMEBEM ABG/VBG Interpreter Pro",
+  "scripts": {
+    "build": "echo 'No build required'"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
