@@ -6,700 +6,459 @@
     <title>WMEBEM ABG/VBG Interpreter Pro</title>
     <meta name="description" content="Professional ABG and VBG analysis tool for UK emergency medicine with comprehensive interpretation">
     <meta name="robots" content="noindex">
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #0066cc;
-            --secondary-color: #f8f9fa;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
-            --info-color: #17a2b8;
-            --text-color: #333;
-            --border-color: #dee2e6;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        /* Custom styles to complement Tailwind */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background: #f5f5f5;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Tailwind's gray-50 */
         }
-        
-        .disclaimer {
-            background: var(--warning-color);
-            color: #000;
-            padding: 12px;
-            text-align: center;
-            font-weight: 500;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .main-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-        
-        .card-header {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #004499 100%);
+        /* Custom styles for toggle buttons */
+        .toggle-btn.active {
+            background-color: #3b82f6; /* Tailwind's blue-500 */
             color: white;
-            padding: 20px;
-            text-align: center;
+            border-color: #3b82f6; /* Tailwind's blue-500 */
         }
-        
-        .card-header h1 {
-            margin: 0;
-            font-size: 1.8rem;
-            font-weight: 300;
+        .toggle-btn {
+            transition: all 0.2s ease-in-out;
         }
-        
-        .card-header .subtitle {
-            font-size: 0.95rem;
-            opacity: 0.9;
-            margin-top: 5px;
-        }
-        
-        .card-body {
-            padding: 25px;
-        }
-        
-        .section-header {
-            color: var(--primary-color);
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin: 20px 0 10px;
-            padding-bottom: 5px;
-            border-bottom: 2px solid var(--border-color);
-        }
-        
-        .input-grid {
-            display: grid;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
-        .grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-        
-        .form-field {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .form-field label {
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: var(--text-color);
-            font-size: 14px;
-        }
-        
-        .form-field input, .form-field select, .form-field textarea {
-            padding: 10px;
-            border: 2px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
-        }
-        
-        .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            border: none;
-            padding: 12px 24px;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            min-width: 150px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #004499 100%);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
-        }
-        
-        .btn-secondary {
-            background: var(--info-color);
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: #138496;
-            transform: translateY(-2px);
-        }
-        
-        .btn:disabled {
-            background: #6c757d;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .loading-indicator {
-            display: none;
-            text-align: center;
-            padding: 30px;
-            background: var(--secondary-color);
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        
+        /* Styling for spinner */
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary-color);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+            border-top-color: #3b82f6;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .analysis-results {
-            display: none;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            margin-top: 20px;
-        }
-        
-        .analysis-heading {
-            color: var(--primary-color);
-            margin: 15px 0 10px;
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-        
-        .analysis-subheading {
-            color: var(--info-color);
-            margin: 10px 0 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-        
+        /* Styling for highlighted text in results */
         .highlight {
-            background: #fff3cd;
-            padding: 2px 4px;
-            border-radius: 3px;
+            background-color: #fef9c3; /* Tailwind's yellow-100 */
+            padding: 2px 6px;
+            border-radius: 4px;
             font-weight: 600;
-        }
-        
-        .error-message {
-            display: none;
-            background: var(--danger-color);
-            color: white;
-            padding: 15px;
-            border-radius: 6px;
-            margin: 15px 0;
-            font-weight: 500;
-        }
-        
-        .ocr-section {
-            background: var(--info-color);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        
-        .ocr-section h3 {
-            margin: 0 0 10px;
-            font-size: 1.2rem;
-        }
-        
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-            cursor: pointer;
-            background: white;
-            color: var(--info-color);
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: 2px solid white;
-        }
-        
-        .file-input-wrapper:hover {
-            background: rgba(255,255,255,0.9);
-            transform: translateY(-1px);
-        }
-        
-        .file-input-wrapper input[type=file] {
-            position: absolute;
-            left: -9999px;
-        }
-        
-        .sources-list {
-            list-style: none;
-            padding: 0;
-            margin-top: 15px;
-        }
-        
-        .sources-list li {
-            margin: 10px 0;
-            padding: 12px;
-            background: var(--secondary-color);
-            border-radius: 6px;
-            border-left: 4px solid var(--primary-color);
-        }
-        
-        .sources-list a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .sources-list a:hover {
-            text-decoration: underline;
-        }
-        
-        @media (max-width: 768px) {
-            .input-grid {
-                grid-template-columns: 1fr !important;
-            }
-            
-            .container {
-                padding: 10px;
-            }
-            
-            .card-body {
-                padding: 15px;
-            }
-            
-            .button-group {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-            }
+            color: #713f12; /* Tailwind's yellow-800 */
         }
     </style>
 </head>
-<body>
-    <div class="disclaimer">
-        <strong>Medical Disclaimer:</strong> This tool is intended for educational and informational purposes only. 
-        It is not a substitute for professional medical advice, diagnosis, or treatment. 
-        All clinical decisions must be based on the independent judgement of a qualified healthcare professional.
-    </div>
-    
-    <div class="container">
-        <div class="main-card">
-            <div class="card-header">
-                <h1>WMEBEM ABG/VBG Interpreter Pro</h1>
-                <div class="subtitle">Professional blood gas analysis for UK emergency medicine</div>
-            </div>
+<body class="text-gray-800">
+
+    <!-- App Header -->
+    <header class="py-4 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto flex items-center space-x-3">
+            <img src="https://i.imgur.com/09eFLTO.png" alt="WMEBEM Logo" class="h-8 w-auto">
+            <h1 class="text-xl font-bold text-gray-700">ABG/VBG Interpreter</h1>
+        </div>
+    </header>
+
+    <main class="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+        <!-- Medical Disclaimer -->
+        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-md mb-8" role="alert">
+            <p class="font-bold">Medical Disclaimer</p>
+            <p class="text-sm">This tool is intended for educational and informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. All clinical decisions must be based on the independent judgement of a qualified healthcare professional.</p>
+        </div>
+
+        <!-- Main content grid: 1 column on mobile, 2 on desktop -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-2 gap-8 items-start">
             
-            <div class="card-body">
-                <div class="ocr-section">
-                    <h3>📷 Upload Blood Gas Image (Optional)</h3>
-                    <p>Upload a photo or screenshot of your blood gas analysis for automatic data extraction.</p>
-                    <div class="file-input-wrapper">
-                        <input type="file" id="imageInput" accept="image/*">
-                        <span>📁 Choose Image File</span>
-                    </div>
-                    <div id="ocrStatus" style="margin-top: 10px; font-size: 14px;"></div>
-                </div>
+            <!-- Left Panel: Patient Data Input -->
+            <div class="lg:col-span-3 xl:col-span-1 bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900 mb-5">Patient Data</h2>
                 
-                <form id="abg-form">
-                    <div class="section-header">Essential Blood Gas Values</div>
-                    <div class="input-grid grid-3">
-                        <div class="form-field">
-                            <label for="ph">pH (7.35-7.45)</label>
-                            <input type="number" id="ph" step="0.01" min="6.5" max="8.0" required>
+                <form id="abg-form" class="space-y-6">
+                    <!-- Sample Type and Entry Method Toggles -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-2">Sample Type</label>
+                            <div id="sample-type-group" class="flex rounded-lg border border-gray-300">
+                                <button type="button" data-value="Arterial" class="sample-type-btn toggle-btn w-1/2 p-2 rounded-l-md active">Arterial</button>
+                                <button type="button" data-value="Venous" class="sample-type-btn toggle-btn w-1/2 p-2 rounded-r-md">Venous</button>
+                                <input type="hidden" id="sampleType" value="Arterial">
+                            </div>
                         </div>
-                        
-                        <div class="form-field">
-                            <label for="pco2">pCO₂ (4.7-6.0 kPa)</label>
-                            <input type="number" id="pco2" step="0.1" min="1" max="20" required>
-                        </div>
-                        
-                        <div class="form-field">
-                            <label for="po2">pO₂ (11-13 kPa)</label>
-                            <input type="number" id="po2" step="0.1" min="3" max="50">
-                        </div>
-                        
-                        <div class="form-field">
-                            <label for="hco3">HCO₃⁻ (22-26 mmol/L)</label>
-                            <input type="number" id="hco3" step="0.1" min="5" max="50" required>
-                        </div>
-                        
-                        <div class="form-field">
-                            <label for="be">Base Excess (-2 to +2 mmol/L)</label>
-                            <input type="number" id="be" step="0.1" min="-30" max="30">
-                        </div>
-                        
-                        <div class="form-field">
-                            <label for="sampleType">Sample Type</label>
-                            <select id="sampleType">
-                                <option value="Arterial">Arterial Blood Gas (ABG)</option>
-                                <option value="Venous">Venous Blood Gas (VBG)</option>
-                                <option value="Capillary">Capillary Blood Gas</option>
-                            </select>
+                         <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-2">Entry Method</label>
+                            <div class="flex rounded-lg border border-gray-300">
+                                <button type="button" id="manual-entry-btn" class="entry-method-btn toggle-btn w-1/2 p-2 rounded-l-md active">Manual Entry</button>
+                                <button type="button" id="photo-entry-btn" class="entry-method-btn toggle-btn w-1/2 p-2 rounded-r-md">📷 Photo</button>
+                                <input type="file" id="imageInput" accept="image/*" class="hidden">
+                            </div>
+                             <div id="ocrStatus" class="mt-2 text-xs text-gray-500 h-4"></div>
                         </div>
                     </div>
                     
-                    <div class="section-header">Electrolytes & Additional Parameters</div>
-                    <div class="input-grid grid-4">
-                        <div class="form-field">
-                            <label for="sodium">Na⁺ (135-145 mmol/L)</label>
-                            <input type="number" id="sodium" min="120" max="160">
-                        </div>
-                        
-                        <div class="form-field">
-                            <label for="potassium">K⁺ (3.5-5.0 mmol/L)</label>
-                            <input type="number" id="potassium" step="0.1" min="2.0" max="7.0">
-                        </div>
-                        
-                        <div class="form-field">
-                            <label for="chloride">Cl⁻ (98-106 mmol/L)</label>
-                            <input type="number" id="chloride" min="80" max="120">
-                        </div>
-                        
-                        <div class="form-field">
-                            <label for="lactate">Lactate (<2.0 mmol/L)</label>
-                            <input type="number" id="lactate" step="0.1" min="0" max="20">
-                        </div>
-                        
-                        <div class="form-field">
-                            <label for="glucose">Glucose (3.9-5.6 mmol/L)</label>
-                            <input type="number" id="glucose" step="0.1" min="1" max="50">
-                        </div>
-                        
-                        <div class="form-field">
-                            <label for="albumin">Albumin (35-50 g/L)</label>
-                            <input type="number" id="albumin" min="15" max="60">
-                        </div>
-                        
-                        <div class="form-field">
-                            <label for="calcium">Ca²⁺ (2.20-2.60 mmol/L)</label>
-                            <input type="number" id="calcium" step="0.01" min="1.5" max="4.0">
-                        </div>
-                        
-                        <div class="form-field">
-                            <label for="hb">Haemoglobin (g/L)</label>
-                            <input type="number" id="hb" min="50" max="200">
+                    <!-- Essential Values -->
+                    <div>
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Essential Values</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- pH -->
+                            <div>
+                                <label for="ph" class="block text-sm font-medium text-gray-600">pH <span class="text-gray-400">(7.35-7.45)</span></label>
+                                <input type="number" id="ph" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" required>
+                            </div>
+                            <!-- pCO2 -->
+                            <div>
+                                <label for="pco2" class="block text-sm font-medium text-gray-600">pCO₂ <span class="text-gray-400">(4.7-6.0 kPa)</span></label>
+                                <input type="number" id="pco2" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" required>
+                            </div>
+                             <!-- pO2 -->
+                             <div>
+                                <label for="po2" class="block text-sm font-medium text-gray-600">pO₂ <span class="text-gray-400">(11-13 kPa)</span></label>
+                                <input type="number" id="po2" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
+                            <!-- HCO3 -->
+                            <div>
+                                <label for="hco3" class="block text-sm font-medium text-gray-600">HCO₃⁻ <span class="text-gray-400">(22-26)</span></label>
+                                <input type="number" id="hco3" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" required>
+                            </div>
+                             <!-- Sodium -->
+                            <div>
+                                <label for="sodium" class="block text-sm font-medium text-gray-600">Na⁺ <span class="text-gray-400">(135-145)</span></label>
+                                <input type="number" id="sodium" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
+                            <!-- Potassium -->
+                            <div>
+                                <label for="potassium" class="block text-sm font-medium text-gray-600">K⁺ <span class="text-gray-400">(3.5-5.0)</span></label>
+                                <input type="number" id="potassium" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
+                             <!-- Chloride -->
+                            <div>
+                                <label for="chloride" class="block text-sm font-medium text-gray-600">Cl⁻ <span class="text-gray-400">(98-106)</span></label>
+                                <input type="number" id="chloride" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
+                            <!-- Lactate -->
+                            <div>
+                                <label for="lactate" class="block text-sm font-medium text-gray-600">Lactate <span class="text-gray-400">(<2.0)</span></label>
+                                <input type="number" id="lactate" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="section-header">Clinical Context</div>
-                    <div class="input-grid grid-2">
-                        <div class="form-field">
-                            <label for="clinicalHistory">Clinical History & Presentation</label>
-                            <textarea id="clinicalHistory" rows="3" placeholder="e.g., 65-year-old with COPD presenting with increasing shortness of breath over 3 days..."></textarea>
-                        </div>
-                        
-                        <div class="form-field">
-                            <label for="medications">Current Medications</label>
-                            <textarea id="medications" rows="3" placeholder="e.g., Salbutamol, prednisolone, ramipril, furosemide..."></textarea>
+                    <!-- Additional Values (Collapsible) -->
+                    <div>
+                        <button type="button" id="additional-values-toggle" class="flex items-center justify-start w-full text-sm font-medium text-blue-600 hover:text-blue-800">
+                             <svg id="additional-values-arrow" class="w-4 h-4 mr-2 transform transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                             <span>Additional Values</span>
+                        </button>
+                        <div id="additional-values-content" class="hidden mt-4 grid grid-cols-2 gap-4">
+                            <!-- Base Excess -->
+                            <div>
+                                <label for="be" class="block text-sm font-medium text-gray-600">Base Excess <span class="text-gray-400">(-2 to +2)</span></label>
+                                <input type="number" id="be" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
+                            <!-- Glucose -->
+                            <div>
+                                <label for="glucose" class="block text-sm font-medium text-gray-600">Glucose <span class="text-gray-400">(3.9-5.6)</span></label>
+                                <input type="number" id="glucose" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
+                             <!-- Albumin -->
+                            <div>
+                                <label for="albumin" class="block text-sm font-medium text-gray-600">Albumin <span class="text-gray-400">(35-50 g/L)</span></label>
+                                <input type="number" id="albumin" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
+                             <!-- Calcium -->
+                            <div>
+                                <label for="calcium" class="block text-sm font-medium text-gray-600">Ca²⁺ <span class="text-gray-400">(2.20-2.60)</span></label>
+                                <input type="number" id="calcium" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
+                            <!-- Haemoglobin -->
+                            <div>
+                                <label for="hb" class="block text-sm font-medium text-gray-600">Haemoglobin <span class="text-gray-400">(g/L)</span></label>
+                                <input type="number" id="hb" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            </div>
                         </div>
                     </div>
+                    
+                    <!-- Clinical Context -->
+                    <div>
+                         <label for="clinicalHistory" class="block text-sm font-medium text-gray-600">Clinical Context</label>
+                         <textarea id="clinicalHistory" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="e.g., 65yo with COPD, increasing SOB..."></textarea>
+                    </div>
+
+                     <!-- Hidden fields for other data -->
+                     <input type="hidden" id="medications">
                 </form>
-                
-                <div class="button-group">
-                    <button type="button" id="analyze-btn" class="btn btn-primary">
-                        🔬 Analyse Blood Gas
+
+                <!-- Action Buttons -->
+                <div class="mt-8 pt-6 border-t border-gray-200 flex items-center justify-end space-x-3">
+                    <button type="button" id="clear-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Clear
                     </button>
-                    <button type="button" id="clear-btn" class="btn btn-secondary">
-                        🗑️ Clear Form
+                    <button type="button" id="analyze-btn" class="inline-flex justify-center px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        Analyze
                     </button>
                 </div>
-                
-                <div id="loading-indicator" class="loading-indicator">
-                    <div class="spinner"></div>
-                    <p><strong>Analysing blood gas values...</strong></p>
-                    <p><small>Performing comprehensive interpretation with UK medical standards</small></p>
+            </div>
+
+            <!-- Right Panel: Analysis Results -->
+            <div id="results-panel" class="lg:col-span-2 xl:col-span-1 bg-white p-6 rounded-2xl shadow-lg border border-gray-200 min-h-[600px] flex flex-col">
+                <!-- Placeholder -->
+                <div id="results-placeholder" class="flex-grow flex flex-col items-center justify-center text-center text-gray-500">
+                    <svg class="w-16 h-16 text-gray-300 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                    <h3 class="text-lg font-semibold text-gray-700">No Results Yet</h3>
+                    <p class="mt-1 text-sm">Enter values and click Analyze to see results.</p>
                 </div>
-                
-                <div id="error-message" class="error-message"></div>
-                
-                <div id="analysis-results" class="analysis-results">
-                    <!-- Analysis results will be inserted here -->
+                 <!-- Loading Indicator -->
+                <div id="loading-indicator" class="hidden flex-grow flex-col items-center justify-center text-center text-gray-500">
+                    <div class="spinner w-12 h-12 rounded-full border-4 border-gray-200 animate-spin mb-4"></div>
+                    <p class="text-md font-semibold text-gray-700">Analyzing Blood Gas...</p>
+                    <p class="text-sm">Please wait while we interpret the results.</p>
                 </div>
-                
-                <div id="sources" style="display: none;">
-                    <!-- Medical sources will be inserted here -->
+                <!-- Error Message -->
+                <div id="error-message" class="hidden p-4 bg-red-100 text-red-700 rounded-lg"></div>
+                <!-- Analysis Results -->
+                <div id="analysis-results" class="hidden prose prose-sm max-w-none">
+                    <!-- Results will be injected here by JavaScript -->
                 </div>
             </div>
         </div>
-    </div>
+    </main>
     
+    <!-- Footer -->
+    <footer class="text-center py-6 text-xs text-gray-500">
+        <p>© 2025 West Midlands Evidence Based Emergency Medicine Ltd. All rights reserved.</p>
+        <p class="mt-1">This is a commercial application. Unauthorised use, reproduction, or distribution is strictly prohibited.</p>
+    </footer>
+
     <script>
-        // Global variables
-        let analysisData = null;
-        
-        // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
-            initializeEventListeners();
-            validateForm();
-        });
-        
-        function initializeEventListeners() {
-            // Analysis button
-            document.getElementById('analyze-btn').addEventListener('click', handleAnalysis);
-            
-            // Clear button
-            document.getElementById('clear-btn').addEventListener('click', clearForm);
-            
-            // Image input for OCR
-            document.getElementById('imageInput').addEventListener('change', handleImageUpload);
-            
-            // Form validation
-            const requiredFields = ['ph', 'pco2', 'hco3'];
-            requiredFields.forEach(fieldId => {
-                document.getElementById(fieldId).addEventListener('input', validateForm);
-            });
-        }
-        
-        function validateForm() {
-            const ph = parseFloat(document.getElementById('ph').value);
-            const pco2 = parseFloat(document.getElementById('pco2').value);
-            const hco3 = parseFloat(document.getElementById('hco3').value);
-            
+            // --- ELEMENT SELECTORS ---
+            const form = document.getElementById('abg-form');
             const analyzeBtn = document.getElementById('analyze-btn');
-            const isValid = !isNaN(ph) && !isNaN(pco2) && !isNaN(hco3) && 
-                           ph >= 6.5 && ph <= 8.0 && 
-                           pco2 >= 1 && pco2 <= 20 && 
-                           hco3 >= 5 && hco3 <= 50;
+            const clearBtn = document.getElementById('clear-btn');
+            const imageInput = document.getElementById('imageInput');
+            const ocrStatus = document.getElementById('ocrStatus');
             
-            analyzeBtn.disabled = !isValid;
-        }
-        
-        async function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const statusDiv = document.getElementById('ocrStatus');
-            statusDiv.innerHTML = '🔄 Processing image...';
-            
-            try {
-                const base64 = await fileToBase64(file);
-                
-                const response = await fetch('/.netlify/functions/ocr', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        image: base64
-                    })
+            const resultsPanel = document.getElementById('results-panel');
+            const resultsPlaceholder = document.getElementById('results-placeholder');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const errorMessage = document.getElementById('error-message');
+            const analysisResults = document.getElementById('analysis-results');
+
+            // --- UI INTERACTION LOGIC ---
+
+            // Sample Type Toggle
+            document.querySelectorAll('.sample-type-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.sample-type-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById('sampleType').value = btn.dataset.value;
                 });
-                
-                if (!response.ok) {
-                    throw new Error(`OCR failed: ${response.status}`);
-                }
-                
-                const result = await response.json();
-                
-                if (result.values) {
-                    populateFormFromOCR(result.values);
-                    statusDiv.innerHTML = '✅ Image processed successfully! Values populated automatically.';
-                    statusDiv.style.color = '#28a745';
-                } else {
-                    throw new Error('No values extracted from image');
-                }
-                
-            } catch (error) {
-                console.error('OCR Error:', error);
-                statusDiv.innerHTML = '❌ Failed to process image. Please enter values manually.';
-                statusDiv.style.color = '#dc3545';
+            });
+
+            // Entry Method Toggle
+            document.getElementById('manual-entry-btn').addEventListener('click', () => {
+                document.getElementById('manual-entry-btn').classList.add('active');
+                document.getElementById('photo-entry-btn').classList.remove('active');
+            });
+
+            document.getElementById('photo-entry-btn').addEventListener('click', () => {
+                document.getElementById('manual-entry-btn').classList.remove('active');
+                document.getElementById('photo-entry-btn').classList.add('active');
+                imageInput.click(); // Open file dialog
+            });
+            
+            // Additional Values Accordion
+            const toggleBtn = document.getElementById('additional-values-toggle');
+            const toggleContent = document.getElementById('additional-values-content');
+            const toggleArrow = document.getElementById('additional-values-arrow');
+            toggleBtn.addEventListener('click', () => {
+                const isHidden = toggleContent.classList.contains('hidden');
+                toggleContent.classList.toggle('hidden', !isHidden);
+                toggleArrow.classList.toggle('rotate-180', isHidden);
+            });
+
+
+            // --- FORM LOGIC ---
+
+            // Form validation to enable/disable analyze button
+            function validateForm() {
+                const ph = document.getElementById('ph').value;
+                const pco2 = document.getElementById('pco2').value;
+                const hco3 = document.getElementById('hco3').value;
+                analyzeBtn.disabled = !(ph && pco2 && hco3);
             }
-        }
-        
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
+
+            // Add input listeners to all required fields for real-time validation
+            form.querySelectorAll('input[required]').forEach(input => {
+                input.addEventListener('input', validateForm);
             });
-        }
-        
-        function populateFormFromOCR(values) {
-            Object.keys(values).forEach(key => {
-                const element = document.getElementById(key);
-                if (element && values[key] !== null && values[key] !== undefined) {
-                    element.value = values[key];
-                }
+
+            // Clear Form
+            clearBtn.addEventListener('click', () => {
+                form.reset();
+                analysisResults.innerHTML = '';
+                ocrStatus.textContent = '';
+                showPanelContent('placeholder');
+                // Reset toggles to default
+                document.querySelectorAll('.sample-type-btn').forEach(b => b.classList.remove('active'));
+                document.querySelector('.sample-type-btn[data-value="Arterial"]').classList.add('active');
+                document.getElementById('sampleType').value = 'Arterial';
+
+                document.querySelectorAll('.entry-method-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('manual-entry-btn').classList.add('active');
+                validateForm();
             });
+
+            // Analyze Button Click
+            analyzeBtn.addEventListener('click', handleAnalysis);
+
+            // Image Upload for OCR
+            imageInput.addEventListener('change', handleImageUpload);
+            
+            // Initial validation check
             validateForm();
-        }
-        
-        async function handleAnalysis() {
-            const loadingDiv = document.getElementById('loading-indicator');
-            const errorDiv = document.getElementById('error-message');
-            const resultsDiv = document.getElementById('analysis-results');
-            
-            // Show loading, hide previous results
-            loadingDiv.style.display = 'block';
-            errorDiv.style.display = 'none';
-            resultsDiv.style.display = 'none';
-            
-            try {
-                const formData = collectFormData();
-                
-                const response = await fetch('/.netlify/functions/analyze', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
+
+            // --- DATA HANDLING AND API CALLS ---
+
+            function collectFormData() {
+                const values = {};
+                const formElements = form.querySelectorAll('input, select, textarea');
+                formElements.forEach(el => {
+                    if (el.type === 'number') {
+                        const val = parseFloat(el.value);
+                        values[el.id] = isNaN(val) ? null : val;
+                    } else if (el.id) {
+                         values[el.id] = el.value.trim() || null;
+                    }
                 });
+                return values;
+            }
+
+            async function handleImageUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
                 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error || `Analysis failed: ${response.status}`);
+                ocrStatus.textContent = '🔄 Processing image...';
+                ocrStatus.classList.remove('text-green-600', 'text-red-600');
+                ocrStatus.classList.add('text-gray-500');
+
+                try {
+                    const base64 = await fileToBase64(file);
+                    // This is a placeholder for your OCR function call.
+                    // Replace with your actual Netlify function or API endpoint.
+                    // const response = await fetch('/.netlify/functions/ocr', { ... });
+                    
+                    // --- MOCK OCR RESPONSE (for demonstration) ---
+                    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+                    const mockOcrData = {
+                        ph: 7.32, pco2: 6.8, po2: 10.5, hco3: 25, sodium: 138,
+                        potassium: 4.1, chloride: 101, lactate: 1.8
+                    };
+                    // --- END MOCK OCR ---
+
+                    populateFormFromOCR(mockOcrData);
+                    ocrStatus.textContent = '✅ Values populated.';
+                    ocrStatus.classList.add('text-green-600');
+                } catch (error) {
+                    console.error('OCR Error:', error);
+                    ocrStatus.textContent = '❌ Failed to process.';
+                    ocrStatus.classList.add('text-red-600');
+                } finally {
+                    // Clear the file input value to allow re-uploading the same file
+                    event.target.value = '';
                 }
-                
-                const analysisResult = await response.json();
-                analysisData = analysisResult;
-                
-                displayAnalysisResults(analysisResult);
-                
-            } catch (error) {
-                console.error('Analysis Error:', error);
-                showError(error.message || 'Analysis failed. Please try again.');
-            } finally {
-                loadingDiv.style.display = 'none';
             }
-        }
-        
-        function collectFormData() {
-            const formElements = document.querySelectorAll('#abg-form input, #abg-form select, #abg-form textarea');
-            const values = {};
-            
-            formElements.forEach(element => {
-                if (element.type === 'number') {
-                    const value = parseFloat(element.value);
-                    values[element.id] = isNaN(value) ? null : value;
-                } else {
-                    values[element.id] = element.value.trim() || null;
-                }
-            });
-            
-            return {
-                values: values,
-                clinicalHistory: values.clinicalHistory,
-                sampleType: values.sampleType || 'Arterial'
-            };
-        }
-        
-        function displayAnalysisResults(result) {
-            const resultsDiv = document.getElementById('analysis-results');
-            
-            let html = `
-                <div class="analysis-heading">📊 Blood Gas Analysis Results</div>
-                
-                <div class="analysis-subheading">🔍 Key Findings</div>
-                <div>${formatAnalysisText(result.keyFindings)}</div>
-                
-                <div class="analysis-subheading">⚖️ Compensation Analysis</div>
-                <div>${formatAnalysisText(result.compensationAnalysis)}</div>
-                
-                <div class="analysis-subheading">🧮 Henderson-Hasselbalch Analysis</div>
-                <div>${formatAnalysisText(result.hhAnalysis)}</div>
-                
-                <div class="analysis-subheading">⚗️ Stewart Analysis</div>
-                <div>${formatAnalysisText(result.stewartAnalysis)}</div>
-                
-                <div class="analysis-subheading">📐 Additional Calculations</div>
-                <div>${formatAnalysisText(result.additionalCalculations)}</div>
-                
-                <div class="analysis-subheading">🩺 Differential Diagnoses</div>
-                <div>${formatAnalysisText(result.differentials)}</div>
-            `;
-            
-            // Add critical care assessment if present
-            if (result.criticalCareAssessment) {
-                html += `
-                    <div class="analysis-subheading">🏥 Critical Care Assessment</div>
-                    <div>${formatAnalysisText(result.criticalCareAssessment)}</div>
-                `;
+
+            function fileToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result.split(',')[1]); // return just the base64 part
+                    reader.onerror = error => reject(error);
+                });
             }
-            
-            // Add biochemical interpretation if present
-            if (result.biochemicalInterpretation) {
-                html += `
-                    <div class="analysis-subheading">🧪 Biochemical Interpretation</div>
-                    <div>${formatAnalysisText(result.biochemicalInterpretation)}</div>
-                `;
-            }
-            
-            resultsDiv.innerHTML = html;
-            resultsDiv.style.display = 'block';
-            
-            // Scroll to results
-            resultsDiv.scrollIntoView({ behavior: 'smooth' });
-        }
-        
-        function formatAnalysisText(text) {
-            if (!text) return 'Analysis not available.';
-            
-            // Convert line breaks and format text
-            return text
-                .replace(/\n\n/g, '</p><p>')
-                .replace(/\n/g, '<br>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong class="highlight">$1</strong>')
-                .replace(/^/, '<p>')
-                .replace(/$/, '</p>');
-        }
-        
-        function showError(message) {
-            const errorDiv = document.getElementById('error-message');
-            errorDiv.innerHTML = `<strong>Error:</strong> ${message}`;
-            errorDiv.style.display = 'block';
-            errorDiv.scrollIntoView({ behavior: 'smooth' });
-        }
-        
-        function clearForm() {
-            if (confirm('Are you sure you want to clear all form data?')) {
-                document.getElementById('abg-form').reset();
-                document.getElementById('analysis-results').style.display = 'none';
-                document.getElementById('error-message').style.display = 'none';
-                document.getElementById('ocrStatus').innerHTML = '';
+
+            function populateFormFromOCR(values) {
+                Object.keys(values).forEach(key => {
+                    const element = document.getElementById(key);
+                    if (element && values[key] !== null) {
+                        element.value = values[key];
+                    }
+                });
                 validateForm();
             }
-        }
+
+            async function handleAnalysis() {
+                showPanelContent('loading');
+                const formData = collectFormData();
+
+                try {
+                    // This is a placeholder for your analysis function call.
+                    // Replace with your actual Netlify function or API endpoint.
+                    // const response = await fetch('/.netlify/functions/analyze', { ... });
+
+                    // --- MOCK ANALYSIS RESPONSE (for demonstration) ---
+                     await new Promise(resolve => setTimeout(resolve, 2000));
+                    const mockAnalysis = {
+                        keyFindings: "**Acute Respiratory Acidosis, Uncompensated.** The primary disturbance is an elevated pCO₂ (**6.8 kPa**) indicating respiratory acidosis. The pH is acidemic (**7.32**).",
+                        compensationAnalysis: "The bicarbonate (**25 mmol/L**) is within the normal range, indicating that there is **no significant metabolic compensation** for this acute respiratory event. Winter's formula is not applicable for a primary respiratory disturbance.",
+                        additionalCalculations: "**Anion Gap:** 16 mmol/L (Elevated). \n**Delta Gap:** 0.8 (Suggests a mixed metabolic component).",
+                        differentials: "Given the respiratory acidosis, differentials include: \n- **COPD Exacerbation:** Common cause of CO₂ retention.\n- **Opiate/Sedative Overdose:** Respiratory depression.\n- **Severe Asthma Attack:** Air trapping and fatigue.\n- **Neuromuscular Disease:** e.g., Myasthenia Gravis crisis.",
+                    };
+                    // --- END MOCK ANALYSIS ---
+
+                    displayAnalysisResults(mockAnalysis);
+                    showPanelContent('results');
+
+                } catch (error) {
+                    console.error('Analysis Error:', error);
+                    errorMessage.textContent = `Analysis failed: ${error.message}. Please check the values and try again.`;
+                    showPanelContent('error');
+                }
+            }
+
+            // --- UI/PANEL DISPLAY LOGIC ---
+            
+            function showPanelContent(contentType) {
+                resultsPlaceholder.classList.add('hidden');
+                loadingIndicator.classList.add('hidden');
+                errorMessage.classList.add('hidden');
+                analysisResults.classList.add('hidden');
+
+                if (contentType === 'placeholder') resultsPlaceholder.classList.remove('hidden');
+                else if (contentType === 'loading') loadingIndicator.classList.remove('hidden');
+                else if (contentType === 'error') errorMessage.classList.remove('hidden');
+                else if (contentType === 'results') analysisResults.classList.remove('hidden');
+            }
+
+            function displayAnalysisResults(result) {
+                let html = `
+                    <h3 class="font-bold text-gray-800 text-lg mb-4">📊 Blood Gas Analysis Results</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-gray-700">Key Findings</h4>
+                            ${formatAnalysisText(result.keyFindings)}
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700">Compensation Analysis</h4>
+                            ${formatAnalysisText(result.compensationAnalysis)}
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700">Additional Calculations</h4>
+                            ${formatAnalysisText(result.additionalCalculations)}
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700">Differential Diagnoses</h4>
+                            ${formatAnalysisText(result.differentials)}
+                        </div>
+                    </div>
+                `;
+                analysisResults.innerHTML = html;
+            }
+
+            function formatAnalysisText(text) {
+                if (!text) return '<p class="text-gray-500">N/A</p>';
+                return text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong class="highlight">$1</strong>')
+                    .replace(/\n/g, '<br>')
+                    .replace(/<br>/g, '</p><p>')
+                    .replace(/^/, '<p>')
+                    .replace(/$/, '</p>');
+            }
+        });
     </script>
 </body>
 </html>
+
