@@ -226,23 +226,32 @@ error: 'No analysis generated. Please try again.'
 
 // Parse JSON response
 let extractedJson;
+let usedFallback = false;
 try {
 let cleaned = responseText.trim();
-cleaned = cleaned.replace(/```json\s*/gi, '').replace(/```\s*/g, '');
+// Remove markdown code blocks more aggressively
+cleaned = cleaned.replace(/```json\s*/gi, '');
+cleaned = cleaned.replace(/```\s*/gi, '');
+cleaned = cleaned.replace(/^json\s*/gi, '');
+// Find JSON boundaries
 const firstBrace = cleaned.indexOf('{');
 const lastBrace = cleaned.lastIndexOf('}');
 
 if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
 cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+// Fix common JSON issues
 cleaned = cleaned.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+// Remove any remaining non-JSON text after the closing brace
+cleaned = cleaned.substring(0, cleaned.lastIndexOf('}') + 1);
 extractedJson = JSON.parse(cleaned);
-console.log('JSON parsed successfully');
+console.log('JSON parsed successfully from API response');
 } else {
 throw new Error('No valid JSON structure found');
 }
 } catch (parseError) {
 console.error('JSON parsing failed:', parseError.message);
 console.error('Response sample:', responseText.substring(0, 500));
+usedFallback = true;
 
 // Enhanced fallback
 const anionGap = values.sodium && values.chloride && values.hco3 ?
