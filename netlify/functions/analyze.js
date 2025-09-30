@@ -31,12 +31,13 @@ error: 'Configuration error. Please contact support.'
 }
 
 const { values, clinicalHistory, sampleType } = JSON.parse(event.body);
-if (!values || typeof values.ph !== 'number' || typeof values.pco2 !== 'number') {
+// FIXED: Added hco3 validation
+if (!values || typeof values.ph !== 'number' || typeof values.pco2 !== 'number' || typeof values.hco3 !== 'number') {
 return {
 statusCode: 400,
 headers,
 body: JSON.stringify({
-error: 'Invalid input. pH and pCO₂ are required.'
+error: 'Invalid input. pH, pCO₂, and HCO₃⁻ are required.'
 })
 };
 }
@@ -560,6 +561,7 @@ body: JSON.stringify(extractedJson)
 
 } catch (error) {
 console.error(`[${new Date().toISOString()}] Function error:`, error);
+console.error('Error stack:', error.stack); // ADDED: Better error debugging
 return {
 statusCode: 500,
 headers,
