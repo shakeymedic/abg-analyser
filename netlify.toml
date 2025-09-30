@@ -16,6 +16,5 @@
   node_bundler = "nft"
 
 # Increase timeout for analyze function to prevent 504 errors
-[[functions]]
-  name = "analyze"
+[functions.analyze]
   timeout = 26
