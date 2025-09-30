@@ -266,7 +266,7 @@ const sidApparent = values.sodium && values.potassium && values.chloride ?
 values.sodium + values.potassium - values.chloride : null;
 
 extractedJson = {
-summary: `Analysis reveals ${values.ph < 7.35 ? 'acidaemia' : values.ph > 7.45 ? 'alkalaemia' : 'normal pH'} requiring attention per UK emergency medicine standards. ${values.lactate > 4 ? 'Critical lactate elevation indicating tissue hypoxia. ' : ''}Primary disorder assessment and comprehensive differential diagnosis available in detailed sections below.`,
+summary: `⚠️ LOCAL ANALYSIS MODE: API response parsing failed, using enhanced local calculations. Analysis reveals ${values.ph < 7.35 ? 'acidaemia' : values.ph > 7.45 ? 'alkalaemia' : 'normal pH'} requiring attention per UK emergency medicine standards. ${values.lactate > 4 ? 'Critical lactate elevation indicating tissue hypoxia. ' : ''}Primary disorder assessment and comprehensive differential diagnosis available in detailed sections below.`,
 
 keyFindings: `Detailed analysis reveals ${values.ph < 7.35 ? 'acidaemia' : values.ph > 7.45 ? 'alkalaemia' : 'normal pH'} requiring consultant-level interpretation. pH ${values.ph} with pathophysiological implications including buffer system kinetics and multi-organ effects. ${values.lactate > 4 ? 'CRITICAL lactate elevation indicating tissue hypoxia with cellular metabolic dysfunction. ' : ''}Comprehensive assessment includes risk stratification, hemodynamic implications, and therapeutic considerations per UK guidelines.`,
 
@@ -302,6 +302,14 @@ extractedJson[key] = `${key} analysis requires full assessment - comprehensive i
 }
 }
 
+// Extract top 3 differentials and add to keyFindings
+if (extractedJson.differentials && extractedJson.keyFindings) {
+const topDifferentials = extractTopDifferentials(extractedJson.differentials);
+if (topDifferentials.length > 0) {
+extractedJson.keyFindings += `\n\nTop Differential Diagnoses:\n${topDifferentials.join('\n')}`;
+}
+}
+
 const executionTime = Date.now() - startTime;
 console.log(`[${new Date().toISOString()}] Analysis completed in ${executionTime}ms`);
 
@@ -325,3 +333,25 @@ details: process.env.NODE_ENV === 'development' ? error.message : undefined
 }
 
 };
+
+// Helper function to extract top 3 differentials from the differentials section
+function extractTopDifferentials(differentialsText) {
+const differentials = [];
+
+// Look for bullet points or numbered items
+const lines = differentialsText.split('\n');
+for (const line of lines) {
+// Match lines starting with bullet, number, or dash
+if (/^[•\-\d]+[\.\):]?\s+(.+)/i.test(line.trim())) {
+const match = line.trim().match(/^[•\-\d]+[\.\):]?\s+(.+)/i);
+if (match && match[1]) {
+const differential = match[1].split(/[:\-→]/)[0].trim(); // Get just the diagnosis name
+if (differential.length > 5 && differential.length < 100) { // Reasonable length
+differentials.push(`• ${differential}`);
+if (differentials.length === 3) break;
+}
+}
+}
+}
+return differentials;
+}
