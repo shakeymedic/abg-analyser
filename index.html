@@ -6,40 +6,33 @@
     <title>WMEBEM ABG/VBG Interpreter Pro</title>
     <meta name="description" content="Professional ABG and VBG analysis tool for UK emergency medicine with comprehensive interpretation">
     <meta name="robots" content="noindex">
-    <!-- Tailwind CSS for modern styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Custom styles to complement Tailwind */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* Tailwind's gray-50 */
+            background-color: #f8fafc;
         }
-        /* Custom styles for toggle buttons */
         .toggle-btn.active {
-            background-color: #3b82f6; /* Tailwind's blue-500 */
+            background-color: #3b82f6;
             color: white;
-            border-color: #3b82f6; /* Tailwind's blue-500 */
+            border-color: #3b82f6;
         }
         .toggle-btn {
             transition: all 0.2s ease-in-out;
         }
-        /* Styling for spinner */
         .spinner {
             border-top-color: #3b82f6;
         }
-        /* Styling for highlighted text in results */
         .highlight {
-            background-color: #fef9c3; /* Tailwind's yellow-100 */
+            background-color: #fef9c3;
             padding: 2px 6px;
             border-radius: 4px;
             font-weight: 600;
-            color: #713f12; /* Tailwind's yellow-800 */
+            color: #713f12;
         }
-        /* Expandable content for analysis results */
         .analysis-section {
             border: 1px solid #e5e7eb;
             border-radius: 8px;
@@ -69,8 +62,6 @@
     </style>
 </head>
 <body class="text-gray-800">
-
-    <!-- App Header -->
     <header class="py-4 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto flex items-center space-x-3">
             <img src="https://iili.io/KGQOvkl.md.png" alt="WMEBEM Logo" class="h-8 w-auto">
@@ -79,21 +70,16 @@
     </header>
 
     <main class="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-        <!-- Medical Disclaimer -->
         <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-md mb-8" role="alert">
             <p class="font-bold">Medical Disclaimer</p>
             <p class="text-sm">This tool is intended for educational and informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. All clinical decisions must be based on the independent judgement of a qualified healthcare professional.</p>
         </div>
 
-        <!-- Main content grid: 1 column on mobile, 2 on desktop -->
         <div class="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-2 gap-8 items-start">
-            
-            <!-- Left Panel: Patient Data Input -->
             <div class="lg:col-span-3 xl:col-span-1 bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
                 <h2 class="text-lg font-semibold text-gray-900 mb-5">Patient Data</h2>
                 
                 <form id="abg-form" class="space-y-6">
-                    <!-- Sample Type and Entry Method Toggles -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-600 mb-2">Sample Type</label>
@@ -114,76 +100,61 @@
                         </div>
                     </div>
                     
-                    <!-- Essential Values -->
                     <div>
                         <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Essential Values</h3>
                         <div class="grid grid-cols-2 gap-4">
-                            <!-- pH -->
                             <div>
                                 <label for="ph" class="block text-sm font-medium text-gray-600">pH <span class="text-gray-400">(7.35-7.45)</span></label>
                                 <input type="number" id="ph" step="0.01" min="6.5" max="8.0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" required>
                             </div>
-                            <!-- pCO2 -->
                             <div>
                                 <label for="pco2" class="block text-sm font-medium text-gray-600">pCO₂ <span class="text-gray-400">(4.7-6.0 kPa)</span></label>
                                 <input type="number" id="pco2" step="0.1" min="1" max="20" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" required>
                             </div>
-                            <!-- pO2 -->
                             <div>
                                 <label for="po2" class="block text-sm font-medium text-gray-600">pO₂ <span class="text-gray-400">(11-13 kPa)</span></label>
                                 <input type="number" id="po2" step="0.1" min="3" max="50" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                             </div>
-                            <!-- HCO3 -->
                             <div>
                                 <label for="hco3" class="block text-sm font-medium text-gray-600">HCO₃⁻ <span class="text-gray-400">(22-26 mmol/L)</span></label>
                                 <input type="number" id="hco3" step="0.1" min="5" max="50" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" required>
                             </div>
-                            <!-- Base Excess -->
                             <div>
                                 <label for="be" class="block text-sm font-medium text-gray-600">Base Excess <span class="text-gray-400">(-2 to +2 mmol/L)</span></label>
                                 <input type="number" id="be" step="0.1" min="-30" max="30" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                             </div>
-                            <!-- Sodium -->
                             <div>
                                 <label for="sodium" class="block text-sm font-medium text-gray-600">Na⁺ <span class="text-gray-400">(135-145 mmol/L)</span></label>
                                 <input type="number" id="sodium" min="120" max="160" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                             </div>
-                            <!-- Potassium -->
                             <div>
                                 <label for="potassium" class="block text-sm font-medium text-gray-600">K⁺ <span class="text-gray-400">(3.5-5.0 mmol/L)</span></label>
                                 <input type="number" id="potassium" step="0.1" min="2.0" max="7.0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                             </div>
-                            <!-- Chloride -->
                             <div>
                                 <label for="chloride" class="block text-sm font-medium text-gray-600">Cl⁻ <span class="text-gray-400">(98-106 mmol/L)</span></label>
                                 <input type="number" id="chloride" min="80" max="120" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                             </div>
-                            <!-- Lactate -->
                             <div>
                                 <label for="lactate" class="block text-sm font-medium text-gray-600">Lactate <span class="text-gray-400">(<2.0 mmol/L)</span></label>
                                 <input type="number" id="lactate" step="0.1" min="0" max="20" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                             </div>
-                            <!-- Glucose -->
                             <div>
                                 <label for="glucose" class="block text-sm font-medium text-gray-600">Glucose <span class="text-gray-400">(3.9-5.6 mmol/L)</span></label>
                                 <input type="number" id="glucose" step="0.1" min="1" max="50" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                             </div>
-                            <!-- Albumin -->
                             <div>
                                 <label for="albumin" class="block text-sm font-medium text-gray-600">Albumin <span class="text-gray-400">(35-50 g/L)</span></label>
                                 <input type="number" id="albumin" min="15" max="60" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                             </div>
-                            <!-- Calcium -->
                             <div>
                                 <label for="calcium" class="block text-sm font-medium text-gray-600">Ca²⁺ <span class="text-gray-400">(2.20-2.60 mmol/L)</span></label>
                                 <input type="number" id="calcium" step="0.01" min="1.5" max="4.0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                             </div>
-                            <!-- Haemoglobin -->
                             <div>
                                 <label for="hb" class="block text-sm font-medium text-gray-600">Haemoglobin <span class="text-gray-400">(g/L)</span></label>
                                 <input type="number" id="hb" min="50" max="200" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                             </div>
-                            <!-- FiO2 -->
                             <div>
                                 <label for="fio2" class="block text-sm font-medium text-gray-600">FiO₂ <span class="text-gray-400">(%)</span></label>
                                 <input type="number" id="fio2" min="21" max="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
@@ -191,55 +162,39 @@
                         </div>
                     </div>
                     
-                    <!-- Clinical Context -->
                     <div>
                         <label for="clinicalHistory" class="block text-sm font-medium text-gray-600">Clinical Context</label>
                         <textarea id="clinicalHistory" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="e.g., 65yo with COPD, increasing SOB over 3 days, purulent sputum..."></textarea>
                     </div>
-
-                    <!-- Hidden fields for medications -->
                     <input type="hidden" id="medications">
                 </form>
 
-                <!-- Action Buttons -->
                 <div class="mt-8 pt-6 border-t border-gray-200 flex items-center justify-end space-x-3">
-                    <button type="button" id="clear-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Clear
-                    </button>
-                    <button type="button" id="analyze-btn" class="inline-flex justify-center px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed">
-                        Analyze
-                    </button>
+                    <button type="button" id="clear-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Clear</button>
+                    <button type="button" id="analyze-btn" class="inline-flex justify-center px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed">Analyze</button>
                 </div>
             </div>
 
-            <!-- Right Panel: Analysis Results -->
             <div id="results-panel" class="lg:col-span-2 xl:col-span-1 bg-white p-6 rounded-2xl shadow-lg border border-gray-200 min-h-[600px] flex flex-col">
-                <!-- Placeholder -->
                 <div id="results-placeholder" class="flex-grow flex flex-col items-center justify-center text-center text-gray-500">
                     <svg class="w-16 h-16 text-gray-300 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
                     <h3 class="text-lg font-semibold text-gray-700">No Results Yet</h3>
                     <p class="mt-1 text-sm">Enter values and click Analyze to see results.</p>
                 </div>
                 
-                <!-- Loading Indicator -->
                 <div id="loading-indicator" class="hidden flex-grow flex-col items-center justify-center text-center text-gray-500">
                     <div class="spinner w-12 h-12 rounded-full border-4 border-gray-200 animate-spin mb-4"></div>
                     <p class="text-md font-semibold text-gray-700">Analyzing Blood Gas...</p>
                     <p class="text-sm">Please wait while we perform ultra-sophisticated consultant-level interpretation.</p>
                 </div>
                 
-                <!-- Error Message -->
                 <div id="error-message" class="hidden p-4 bg-red-100 text-red-700 rounded-lg"></div>
                 
-                <!-- Analysis Results -->
-                <div id="analysis-results" class="hidden prose prose-sm max-w-none">
-                    <!-- Results will be injected here by JavaScript -->
-                </div>
+                <div id="analysis-results" class="hidden prose prose-sm max-w-none"></div>
             </div>
         </div>
     </main>
     
-    <!-- Footer -->
     <footer class="text-center py-6 text-xs text-gray-500">
         <p>© 2025 West Midlands Evidence Based Emergency Medicine Ltd. All rights reserved.</p>
         <p class="mt-1">This is a commercial application. Unauthorised use, reproduction, or distribution is strictly prohibited.</p>
@@ -247,22 +202,17 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // --- ELEMENT SELECTORS ---
             const form = document.getElementById('abg-form');
             const analyzeBtn = document.getElementById('analyze-btn');
             const clearBtn = document.getElementById('clear-btn');
             const imageInput = document.getElementById('imageInput');
             const ocrStatus = document.getElementById('ocrStatus');
-            
             const resultsPanel = document.getElementById('results-panel');
             const resultsPlaceholder = document.getElementById('results-placeholder');
             const loadingIndicator = document.getElementById('loading-indicator');
             const errorMessage = document.getElementById('error-message');
             const analysisResults = document.getElementById('analysis-results');
 
-            // --- UI INTERACTION LOGIC ---
-
-            // Sample Type Toggle
             document.querySelectorAll('.sample-type-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     document.querySelectorAll('.sample-type-btn').forEach(b => b.classList.remove('active'));
@@ -271,7 +221,6 @@
                 });
             });
 
-            // Entry Method Toggle
             document.getElementById('manual-entry-btn').addEventListener('click', () => {
                 document.getElementById('manual-entry-btn').classList.add('active');
                 document.getElementById('photo-entry-btn').classList.remove('active');
@@ -280,12 +229,9 @@
             document.getElementById('photo-entry-btn').addEventListener('click', () => {
                 document.getElementById('manual-entry-btn').classList.remove('active');
                 document.getElementById('photo-entry-btn').classList.add('active');
-                imageInput.click(); // Open file dialog
+                imageInput.click();
             });
 
-            // --- FORM LOGIC ---
-
-            // Form validation to enable/disable analyze button
             function validateForm() {
                 const ph = document.getElementById('ph').value;
                 const pco2 = document.getElementById('pco2').value;
@@ -293,44 +239,32 @@
                 analyzeBtn.disabled = !(ph && pco2 && hco3);
             }
 
-            // Add input listeners to all required fields for real-time validation
             form.querySelectorAll('input[required]').forEach(input => {
                 input.addEventListener('input', validateForm);
             });
 
-            // Clear Form
             clearBtn.addEventListener('click', () => {
                 if (confirm('Are you sure you want to clear all form data?')) {
                     form.reset();
                     analysisResults.innerHTML = '';
                     ocrStatus.textContent = '';
                     showPanelContent('placeholder');
-                    // Reset toggles to default
                     document.querySelectorAll('.sample-type-btn').forEach(b => b.classList.remove('active'));
                     document.querySelector('.sample-type-btn[data-value="Arterial"]').classList.add('active');
                     document.getElementById('sampleType').value = 'Arterial';
-
                     document.querySelectorAll('.entry-method-btn').forEach(b => b.classList.remove('active'));
                     document.getElementById('manual-entry-btn').classList.add('active');
                     validateForm();
                 }
             });
 
-            // Analyze Button Click
             analyzeBtn.addEventListener('click', handleAnalysis);
-
-            // Image Upload for OCR
             imageInput.addEventListener('change', handleImageUpload);
-            
-            // Initial validation check
             validateForm();
-
-            // --- DATA HANDLING AND API CALLS ---
 
             function collectFormData() {
                 const formElements = document.querySelectorAll('#abg-form input, #abg-form select, #abg-form textarea');
                 const values = {};
-                
                 formElements.forEach(element => {
                     if (element.type === 'number') {
                         const value = parseFloat(element.value);
@@ -339,7 +273,6 @@
                         values[element.id] = element.value.trim() || null;
                     }
                 });
-                
                 return {
                     values: values,
                     clinicalHistory: values.clinicalHistory,
@@ -350,30 +283,18 @@
             async function handleImageUpload(event) {
                 const file = event.target.files[0];
                 if (!file) return;
-                
                 ocrStatus.textContent = '🔄 Processing image...';
                 ocrStatus.classList.remove('text-green-600', 'text-red-600');
                 ocrStatus.classList.add('text-gray-500');
-
                 try {
                     const base64 = await fileToBase64(file);
-                    
                     const response = await fetch('/.netlify/functions/ocr', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            image: base64
-                        })
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: base64 })
                     });
-                    
-                    if (!response.ok) {
-                        throw new Error(`OCR failed: ${response.status}`);
-                    }
-                    
+                    if (!response.ok) throw new Error(`OCR failed: ${response.status}`);
                     const result = await response.json();
-                    
                     if (result.values) {
                         populateFormFromOCR(result.values);
                         ocrStatus.textContent = '✅ Image processed successfully! Values populated automatically.';
@@ -381,13 +302,11 @@
                     } else {
                         throw new Error('No values extracted from image');
                     }
-                    
                 } catch (error) {
                     console.error('OCR Error:', error);
                     ocrStatus.textContent = '❌ Failed to process image. Please enter values manually.';
                     ocrStatus.classList.add('text-red-600');
                 } finally {
-                    // Clear the file input value to allow re-uploading the same file
                     event.target.value = '';
                 }
             }
@@ -413,28 +332,20 @@
 
             async function handleAnalysis() {
                 showPanelContent('loading');
-                
                 try {
                     const formData = collectFormData();
-                    
                     const response = await fetch('/.netlify/functions/analyze', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(formData)
                     });
-                    
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => ({}));
                         throw new Error(errorData.error || `Analysis failed: ${response.status}`);
                     }
-                    
                     const analysisResult = await response.json();
-                    
                     displayAnalysisResults(analysisResult);
                     showPanelContent('results');
-                    
                 } catch (error) {
                     console.error('Analysis Error:', error);
                     errorMessage.textContent = error.message || 'Analysis failed. Please try again.';
@@ -442,14 +353,11 @@
                 }
             }
 
-            // --- UI/PANEL DISPLAY LOGIC ---
-            
             function showPanelContent(contentType) {
                 resultsPlaceholder.classList.add('hidden');
                 loadingIndicator.classList.add('hidden');
                 errorMessage.classList.add('hidden');
                 analysisResults.classList.add('hidden');
-
                 if (contentType === 'placeholder') resultsPlaceholder.classList.remove('hidden');
                 else if (contentType === 'loading') loadingIndicator.classList.remove('hidden');
                 else if (contentType === 'error') errorMessage.classList.remove('hidden');
@@ -458,62 +366,33 @@
 
             function displayAnalysisResults(result) {
                 let html = '';
-                
-                // Executive Summary (if present)
                 if (result.summary) {
-                    html += `
-                        <div class="summary-box">
-                            <h3 class="font-bold text-lg mb-2">📋 Executive Summary</h3>
-                            <div class="text-sm opacity-95">${formatAnalysisText(result.summary)}</div>
-                        </div>
-                    `;
+                    html += '<div class="summary-box"><h3 class="font-bold text-lg mb-2">📋 Executive Summary</h3><div class="text-sm opacity-95">' + formatAnalysisText(result.summary) + '</div></div>';
                 }
-                
-                // Main sections with expandable content
                 const sections = [
-                    { key: 'keyFindings', title: '🔍 Key Findings', icon: '🔍' },
-                    { key: 'compensationAnalysis', title: '⚖️ Compensation Analysis', icon: '⚖️' },
-                    { key: 'hhAnalysis', title: '🧮 Henderson-Hasselbalch Analysis', icon: '🧮' },
-                    { key: 'stewartAnalysis', title: '⚗️ Stewart Analysis', icon: '⚗️' },
-                    { key: 'additionalCalculations', title: '📐 Additional Calculations', icon: '📐' },
-                    { key: 'differentials', title: '🩺 Differential Diagnoses', icon: '🩺' },
-                    { key: 'criticalCareAssessment', title: '🏥 Critical Care Assessment', icon: '🏥' },
-                    { key: 'biochemicalInterpretation', title: '🧪 Biochemical Interpretation', icon: '🧪' }
+                    { key: 'keyFindings', title: '🔍 Key Findings' },
+                    { key: 'compensationAnalysis', title: '⚖️ Compensation Analysis' },
+                    { key: 'hhAnalysis', title: '🧮 Henderson-Hasselbalch Analysis' },
+                    { key: 'stewartAnalysis', title: '⚗️ Stewart Analysis' },
+                    { key: 'additionalCalculations', title: '📐 Additional Calculations' },
+                    { key: 'differentials', title: '🩺 Differential Diagnoses' },
+                    { key: 'criticalCareAssessment', title: '🏥 Critical Care Assessment' },
+                    { key: 'biochemicalInterpretation', title: '🧪 Biochemical Interpretation' }
                 ];
-                
                 sections.forEach(section => {
                     if (result[section.key]) {
-                        html += `
-                            <div class="analysis-section">
-                                <div class="analysis-header" onclick="toggleSection('${section.key}')">
-                                    <div class="flex items-center justify-between">
-                                        <h4 class="font-semibold text-gray-800">${section.title}</h4>
-                                        <svg id="${section.key}-arrow" class="w-5 h-5 text-gray-400 transform transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div id="${section.key}-content" class="analysis-content hidden">
-                                    ${formatAnalysisText(result[section.key])}
-                                </div>
-                            </div>
-                        `;
+                        html += '<div class="analysis-section"><div class="analysis-header" onclick="toggleSection(\'' + section.key + '\')"><div class="flex items-center justify-between"><h4 class="font-semibold text-gray-800">' + section.title + '</h4><svg id="' + section.key + '-arrow" class="w-5 h-5 text-gray-400 transform transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></div></div><div id="' + section.key + '-content" class="analysis-content hidden">' + formatAnalysisText(result[section.key]) + '</div></div>';
                     }
                 });
-                
                 analysisResults.innerHTML = html;
-                
-                // CHANGED: Always show Key Findings section by default
                 if (result.keyFindings) {
                     setTimeout(() => toggleSection('keyFindings'), 100);
                 }
             }
 
-            // Make toggleSection available globally
             window.toggleSection = function(sectionId) {
                 const content = document.getElementById(sectionId + '-content');
                 const arrow = document.getElementById(sectionId + '-arrow');
-                
                 if (content && arrow) {
                     const isHidden = content.classList.contains('hidden');
                     content.classList.toggle('hidden', !isHidden);
@@ -523,16 +402,19 @@
 
             function formatAnalysisText(text) {
                 if (!text) return '<p class="text-gray-500">Analysis not available.</p>';
-                
-                // Convert line breaks and format text
-                return text
-                    .replace(/\n\n/g, '</p><p class="mb-4">')
-                    .replace(/\n/g, '<br>')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong class="highlight">$1</strong>')
-                    .replace(/^/, '<div class="prose prose-sm max-w-none"><p class="mb-4">')
-                    .replace(/$/, '</p></div>');
+                let formatted = text;
+                formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>');
+                formatted = formatted.replace(/^[•\-]\s+(.+)$/gm, '<li>$1</li>');
+                formatted = formatted.replace(/(<li>.*?<\/li>)/gs, function(match) {
+                    return '<ul class="list-disc list-inside mb-3 space-y-1">' + match + '</ul>';
+                });
+                formatted = formatted.replace(/\n\n/g, '</p><p class="mb-3">');
+                formatted = formatted.replace(/\n/g, '<br>');
+                formatted = '<div class="prose prose-sm max-w-none text-gray-700 leading-relaxed"><p class="mb-3">' + formatted + '</p></div>';
+                formatted = formatted.replace(/<p class="mb-3">\s*<\/p>/g, '');
+                return formatted;
             }
         });
     </script>
 </body>
-</html
+</html>
