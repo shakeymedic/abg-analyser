@@ -25,15 +25,21 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        const { bloodGasData } = JSON.parse(event.body);
+        const requestBody = JSON.parse(event.body);
+        
+        // Handle both old and new format
+        const bloodGasData = requestBody.bloodGasData || requestBody;
 
-        if (!bloodGasData) {
+        if (!bloodGasData || !bloodGasData.values) {
+            console.error('[Claude] Invalid request format:', requestBody);
             return {
                 statusCode: 400,
                 headers,
                 body: JSON.stringify({ error: 'Blood gas data is required' })
             };
         }
+
+        const { values, clinicalHistory, sampleType } = bloodGasData;
 
         const apiKey = process.env.ANTHROPIC_API_KEY;
         if (!apiKey) {
@@ -68,6 +74,9 @@ Use clear medical terminology appropriate for qualified clinicians. Include rele
 
         console.log('[Claude] Sending analysis request to Anthropic API');
 
+        // Format the blood gas data nicely for Claude
+        const formattedData = formatBloodGasData(values, clinicalHistory, sampleType);
+
         // Call Claude API with prompt caching
         const response = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
@@ -91,7 +100,7 @@ Use clear medical terminology appropriate for qualified clinicians. Include rele
                         role: 'user',
                         content: `Please analyse the following blood gas results and provide a comprehensive interpretation:
 
-${bloodGasData}
+${formattedData}
 
 Provide a structured analysis including executive summary, primary interpretation, detailed analysis with calculations, differential diagnoses, and clinical recommendations.`
                     }
@@ -149,6 +158,36 @@ Provide a structured analysis including executive summary, primary interpretatio
         };
     }
 };
+
+// Helper function to format blood gas data for Claude
+function formatBloodGasData(values, clinicalHistory, sampleType) {
+    let formatted = `Sample Type: ${sampleType}\n\n`;
+    formatted += `ESSENTIAL VALUES:\n`;
+    if (values.ph) formatted += `pH: ${values.ph}\n`;
+    if (values.pco2) formatted += `pCO2: ${values.pco2} kPa\n`;
+    if (values.po2) formatted += `pO2: ${values.po2} kPa\n`;
+    if (values.hco3) formatted += `HCO3-: ${values.hco3} mmol/L\n`;
+    if (values.be) formatted += `Base Excess: ${values.be} mmol/L\n`;
+    
+    formatted += `\nELECTROLYTES:\n`;
+    if (values.sodium) formatted += `Na+: ${values.sodium} mmol/L\n`;
+    if (values.potassium) formatted += `K+: ${values.potassium} mmol/L\n`;
+    if (values.chloride) formatted += `Cl-: ${values.chloride} mmol/L\n`;
+    
+    formatted += `\nOTHER VALUES:\n`;
+    if (values.lactate) formatted += `Lactate: ${values.lactate} mmol/L\n`;
+    if (values.glucose) formatted += `Glucose: ${values.glucose} mmol/L\n`;
+    if (values.albumin) formatted += `Albumin: ${values.albumin} g/L\n`;
+    if (values.calcium) formatted += `Ca2+: ${values.calcium} mmol/L\n`;
+    if (values.hb) formatted += `Haemoglobin: ${values.hb} g/L\n`;
+    if (values.fio2) formatted += `FiO2: ${values.fio2}%\n`;
+    
+    if (clinicalHistory) {
+        formatted += `\nCLINICAL CONTEXT:\n${clinicalHistory}\n`;
+    }
+    
+    return formatted;
+}
 
 // Helper function to parse analysis into sections
 function parseAnalysisIntoSections(text) {
