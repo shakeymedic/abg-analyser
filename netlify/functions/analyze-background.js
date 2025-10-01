@@ -4,8 +4,7 @@
 // are stored in an in‑memory object keyed by jobId.  For production use you
 // should replace the global store with a persistent data store (e.g. Redis or DynamoDB).
 
-const { v4: uuidv4 } = require('uuid');
-
+const { randomUUID } = require('crypto');
 // Global store of pending/completed jobs.  In production this should be persisted.
 const jobStore = {};
 
@@ -14,7 +13,7 @@ exports.handler = async function (event, context) {
   context.callbackWaitsForEmptyEventLoop = false;
 
   const payload = JSON.parse(event.body || '{}');
-  const jobId = uuidv4();
+  const jobId = randomUUID()();
 
   // Start the analysis in the background
   performAnalysis(jobId, payload).catch(err => {
