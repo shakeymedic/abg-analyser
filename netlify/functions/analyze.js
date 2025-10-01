@@ -53,24 +53,16 @@ exports.handler = async (event, context) => {
 
         // Optimised system prompt with prompt caching
         // This will be cached and reused, saving ~90% on repeated calls
-        const systemPrompt = `You are an expert consultant in respiratory medicine and critical care, specialising in arterial and venous blood gas interpretation. Your role is to provide thorough, clinically accurate analysis suitable for medical professionals.
+        const systemPrompt = `You are an expert consultant providing concise, clinically-focused blood gas interpretation.
 
-INTERPRETATION FRAMEWORK:
-1. Assess oxygenation status (PaO2, SaO2, A-a gradient if FiO2 provided)
-2. Determine acid-base status (pH, PaCO2, HCO3, base excess)
-3. Identify primary disorder and any compensation
-4. Calculate relevant indices (anion gap, A-a gradient, osmolal gap if applicable)
-5. Provide differential diagnoses based on the pattern
-6. Suggest clinical correlation and next steps
+RESPONSE FORMAT (be concise but thorough):
+1. Executive Summary (2-3 sentences): Clinical bottom line
+2. Primary Interpretation (3-4 sentences): Main findings
+3. Key Calculations: Anion gap, A-a gradient if applicable
+4. Top 3 Differential Diagnoses: Most likely causes
+5. Immediate Actions (2-3 points): Critical next steps
 
-RESPONSE STRUCTURE:
-- Executive Summary: 2-3 sentence clinical bottom line
-- Primary Interpretation: Main acid-base and oxygenation findings
-- Detailed Analysis: Step-by-step reasoning with calculations
-- Differential Diagnoses: Ranked by likelihood with brief rationales
-- Clinical Recommendations: Immediate actions and further investigations
-
-Use clear medical terminology appropriate for qualified clinicians. Include relevant calculations and reference ranges. Be systematic, thorough, and clinically practical.`;
+Use clear medical terminology. Be systematic but concise. Focus on clinical utility.`;
 
         console.log('[Claude] Sending analysis request to Anthropic API');
 
@@ -87,7 +79,7 @@ Use clear medical terminology appropriate for qualified clinicians. Include rele
             },
             body: JSON.stringify({
                 model: 'claude-sonnet-4-5-20250929',
-                max_tokens: 2500,
+                max_tokens: 1500,  // Reduced from 2500 for faster response
                 system: [
                     {
                         type: 'text',
@@ -98,11 +90,11 @@ Use clear medical terminology appropriate for qualified clinicians. Include rele
                 messages: [
                     {
                         role: 'user',
-                        content: `Please analyse the following blood gas results and provide a comprehensive interpretation:
+                        content: `Analyse these blood gas results concisely:
 
 ${formattedData}
 
-Provide a structured analysis including executive summary, primary interpretation, detailed analysis with calculations, differential diagnoses, and clinical recommendations.`
+Provide: Executive Summary, Primary Interpretation, Key Calculations, Top 3 Differentials, and Immediate Actions. Be thorough but concise.`
                     }
                 ]
             })
