@@ -191,22 +191,33 @@ function parseAnalysisIntoSections(text) {
         recommendations: ''
     };
 
-    // Simple section parsing - looks for common headers
-    const summaryMatch = text.match(/(?:Executive Summary|Summary):?\s*\n?(.*?)(?=\n(?:Primary|Detailed|Differential|Clinical|$))/is);
-    const primaryMatch = text.match(/Primary (?:Interpretation|Findings?):?\s*\n?(.*?)(?=\n(?:Detailed|Differential|Clinical|$))/is);
-    const detailedMatch = text.match(/Detailed Analysis:?\s*\n?(.*?)(?=\n(?:Differential|Clinical|$))/is);
-    const differentialMatch = text.match(/Differential Diagnos[ie]s:?\s*\n?(.*?)(?=\n(?:Clinical|Recommendations|$))/is);
-    const recommendationsMatch = text.match(/(?:Clinical Recommendations?|Recommendations?):?\s*\n?(.*?)$/is);
+    // Enhanced section parsing with more flexible patterns
+    const summaryMatch = text.match(/(?:Executive Summary|Summary|EXECUTIVE SUMMARY)[\s:]*\n?(.*?)(?=\n\n(?:[A-Z#]|$)|$)/is);
+    const primaryMatch = text.match(/(?:Primary Interpretation|Primary Findings?|PRIMARY INTERPRETATION)[\s:]*\n?(.*?)(?=\n\n(?:[A-Z#]|$)|$)/is);
+    const calculationsMatch = text.match(/(?:Key Calculations?|Calculations?|KEY CALCULATIONS)[\s:]*\n?(.*?)(?=\n\n(?:[A-Z#]|$)|$)/is);
+    const differentialsMatch = text.match(/(?:Top \d+ )?(?:Differential Diagnos[ie]s|Differentials?|DIFFERENTIAL)[\s:]*\n?(.*?)(?=\n\n(?:[A-Z#]|$)|$)/is);
+    const recommendationsMatch = text.match(/(?:Immediate Actions?|Clinical Recommendations?|Recommendations?|IMMEDIATE ACTIONS)[\s:]*\n?(.*?)$/is);
 
     if (summaryMatch) sections.summary = summaryMatch[1].trim();
     if (primaryMatch) sections.primaryInterpretation = primaryMatch[1].trim();
-    if (detailedMatch) sections.detailedAnalysis = detailedMatch[1].trim();
-    if (differentialMatch) sections.differentials = differentialMatch[1].trim();
+    if (calculationsMatch) {
+        // Add calculations to detailed analysis
+        sections.detailedAnalysis = calculationsMatch[1].trim();
+    }
+    if (differentialsMatch) sections.differentials = differentialsMatch[1].trim();
     if (recommendationsMatch) sections.recommendations = recommendationsMatch[1].trim();
 
-    // Fallback: if no sections found, put everything in detailed analysis
-    if (!summaryMatch && !primaryMatch && !detailedMatch && !differentialMatch && !recommendationsMatch) {
-        sections.detailedAnalysis = text;
+    // Fallback: if no structured sections found, try to split by numbered sections
+    if (!summaryMatch && !primaryMatch && !calculationsMatch) {
+        const lines = text.split('\n\n');
+        if (lines.length >= 3) {
+            sections.summary = lines[0];
+            sections.primaryInterpretation = lines[1];
+            sections.detailedAnalysis = lines.slice(2).join('\n\n');
+        } else {
+            // Last resort: put everything in detailed analysis
+            sections.detailedAnalysis = text;
+        }
     }
 
     return sections;
