@@ -185,7 +185,7 @@
                 <div id="loading-indicator" class="hidden flex-grow flex-col items-center justify-center text-center text-gray-500">
                     <div class="spinner w-12 h-12 rounded-full border-4 border-gray-200 animate-spin mb-4"></div>
                     <p class="text-md font-semibold text-gray-700">Analyzing Blood Gas...</p>
-                    <p class="text-sm">Please wait while we perform ultra-sophisticated consultant-level interpretation.</p>
+                    <p class="text-sm">Please wait while we perform consultant-level interpretation.</p>
                 </div>
                 
                 <div id="error-message" class="hidden p-4 bg-red-100 text-red-700 rounded-lg"></div>
@@ -334,16 +334,22 @@
                 showPanelContent('loading');
                 try {
                     const formData = collectFormData();
+                    console.log('Sending data:', formData);
+                    
                     const response = await fetch('/.netlify/functions/analyze', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(formData)
                     });
+                    
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => ({}));
                         throw new Error(errorData.error || `Analysis failed: ${response.status}`);
                     }
+                    
                     const analysisResult = await response.json();
+                    console.log('Received result:', analysisResult);
+                    
                     displayAnalysisResults(analysisResult);
                     showPanelContent('results');
                 } catch (error) {
@@ -365,29 +371,80 @@
             }
 
             function displayAnalysisResults(result) {
+                console.log('Displaying results:', result);
+                
                 let html = '';
-                if (result.summary) {
-                    html += '<div class="summary-box"><h3 class="font-bold text-lg mb-2">📋 Executive Summary</h3><div class="text-sm opacity-95">' + formatAnalysisText(result.summary) + '</div></div>';
+                
+                if (!result.analysis && !result.sections) {
+                    html = '<div class="p-4 bg-red-100 text-red-700 rounded-lg">No analysis data received from API.</div>';
+                    analysisResults.innerHTML = html;
+                    return;
                 }
-                const sections = [
-                    { key: 'keyFindings', title: '🔍 Key Findings' },
-                    { key: 'compensationAnalysis', title: '⚖️ Compensation Analysis' },
-                    { key: 'hhAnalysis', title: '🧮 Henderson-Hasselbalch Analysis' },
-                    { key: 'stewartAnalysis', title: '⚗️ Stewart Analysis' },
-                    { key: 'additionalCalculations', title: '📐 Additional Calculations' },
-                    { key: 'differentials', title: '🩺 Differential Diagnoses' },
-                    { key: 'criticalCareAssessment', title: '🏥 Critical Care Assessment' },
-                    { key: 'biochemicalInterpretation', title: '🧪 Biochemical Interpretation' }
-                ];
-                sections.forEach(section => {
-                    if (result[section.key]) {
-                        html += '<div class="analysis-section"><div class="analysis-header" onclick="toggleSection(\'' + section.key + '\')"><div class="flex items-center justify-between"><h4 class="font-semibold text-gray-800">' + section.title + '</h4><svg id="' + section.key + '-arrow" class="w-5 h-5 text-gray-400 transform transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></div></div><div id="' + section.key + '-content" class="analysis-content hidden">' + formatAnalysisText(result[section.key]) + '</div></div>';
+                
+                if (result.sections) {
+                    if (result.sections.summary) {
+                        html += `
+                            <div class="summary-box">
+                                <h3 class="font-bold text-lg mb-2">📋 Executive Summary</h3>
+                                <div class="text-sm opacity-95">${formatAnalysisText(result.sections.summary)}</div>
+                            </div>`;
                     }
-                });
-                analysisResults.innerHTML = html;
-                if (result.keyFindings) {
-                    setTimeout(() => toggleSection('keyFindings'), 100);
+                    
+                    if (result.sections.primaryInterpretation) {
+                        html += createSection('primary', '🔍 Primary Interpretation', result.sections.primaryInterpretation);
+                    }
+                    
+                    if (result.sections.detailedAnalysis) {
+                        html += createSection('detailed', '📊 Key Calculations', result.sections.detailedAnalysis);
+                    }
+                    
+                    if (result.sections.differentials) {
+                        html += createSection('differentials', '🩺 Top Differential Diagnoses', result.sections.differentials);
+                    }
+                    
+                    if (result.sections.recommendations) {
+                        html += createSection('recommendations', '💊 Immediate Actions', result.sections.recommendations);
+                    }
                 }
+                
+                if (!html && result.analysis) {
+                    html += `
+                        <div class="summary-box">
+                            <h3 class="font-bold text-lg mb-2">📋 Analysis</h3>
+                            <div class="text-sm opacity-95">${formatAnalysisText(result.analysis)}</div>
+                        </div>`;
+                }
+                
+                if (!html) {
+                    html = '<div class="p-4 bg-yellow-100 text-yellow-700 rounded-lg">Analysis completed but no content could be displayed. Please check the console for details.</div>';
+                }
+                
+                analysisResults.innerHTML = html;
+                
+                setTimeout(() => {
+                    const firstContent = document.querySelector('[id$="-content"]');
+                    if (firstContent) {
+                        const sectionId = firstContent.id.replace('-content', '');
+                        toggleSection(sectionId);
+                    }
+                }, 100);
+            }
+
+            function createSection(id, title, content) {
+                return `
+                    <div class="analysis-section">
+                        <div class="analysis-header" onclick="toggleSection('${id}')">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-semibold text-gray-800">${title}</h4>
+                                <svg id="${id}-arrow" class="w-5 h-5 text-gray-400 transform transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div id="${id}-content" class="analysis-content hidden">
+                            ${formatAnalysisText(content)}
+                        </div>
+                    </div>`;
             }
 
             window.toggleSection = function(sectionId) {
