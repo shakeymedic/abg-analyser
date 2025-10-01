@@ -15,6 +15,5 @@
 [functions]
   node_bundler = "nft"
 
-# Increase timeout for analyze function to prevent 504 errors
-[functions.analyze]
-  timeout = 26
+# Removed function-specific timeout - will use account default (10s for free/pro, 26s for business+)
+# The optimizations in analyze.js should keep response time under 15 seconds
