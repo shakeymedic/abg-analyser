@@ -480,23 +480,19 @@ async function handleAnalysis() {
             };
 
             function formatAnalysisText(text) {
-                if (!text) return '<p class="text-gray-500">Analysis not available.</p>';
-                let formatted = text;
-                formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>');
-                formatted = formatted.replace(/^[•\-]\s+(.+)$/gm, '<li>$1</li>');
-                formatted = formatted.replace(/(<li>.*?<\/li>)/gs, function(match) {
-                    return '<ul class="list-disc list-inside mb-3 space-y-1">' + match + '</ul>';
-                });
-                formatted = formatted.replace(/
-
-/g, '</p><p class="mb-3">');
-                formatted = formatted.replace(/
-/g, '<br>');
-                formatted = '<div class="prose prose-sm max-w-none text-gray-700 leading-relaxed"><p class="mb-3">' + formatted + '</p></div>';
-                formatted = formatted.replace(/<p class="mb-3">\s*<\/p>/g, '');
-                return formatted;
-            }
-        });
+    if (!text) return '<p class="text-gray-500">Analysis not available.</p>';
+    let formatted = text;
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>');
+    formatted = formatted.replace(/^[\u2022\-]\s+(.+)$/gm, '<li>$1</li>');
+    formatted = formatted.replace(/(<li>.*?<\/li>)/gs, function(match) {
+        return '<ul class="list-disc list-inside mb-3 space-y-1">' + match + '</ul>';
+    });
+    formatted = formatted.replace(/\n\n/g, '</p><p class="mb-3">');
+    formatted = formatted.replace(/\n/g, '<br>');
+    formatted = '<div class="prose prose-sm max-w-none text-gray-700 leading-relaxed"><p class="mb-3">' + formatted + '</p></div>';
+    formatted = formatted.replace(/<p class="mb-3">\s*<\/p>/g, '');
+    return formatted;
+});
     </script>
 </body>
 </html>
