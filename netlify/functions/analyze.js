@@ -1,5 +1,6 @@
 // Netlify Function: analyze.js
 // Optimized for Claude Sonnet 4.5 with prompt caching
+// UK Emergency Medicine Guidelines Compliant
 
 exports.handler = async (event, context) => {
     // CORS headers
@@ -51,18 +52,84 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // Optimised system prompt with prompt caching
-        // This will be cached and reused, saving ~90% on repeated calls
-        const systemPrompt = `You are an expert consultant providing concise, clinically-focused blood gas interpretation.
+        // ENHANCED system prompt with UK guidelines and dual interpretation methods
+        // This will be CACHED and reused, saving ~90% on repeated calls
+        const systemPrompt = `You are a UK emergency medicine consultant providing comprehensive blood gas interpretation using evidence-based guidelines.
 
-RESPONSE FORMAT (be concise but thorough):
-1. Executive Summary (2-3 sentences): Clinical bottom line
-2. Primary Interpretation (3-4 sentences): Main findings
-3. Key Calculations: Anion gap, A-a gradient if applicable
-4. Top 3 Differential Diagnoses: Most likely causes
-5. Immediate Actions (2-3 points): Critical next steps
+CRITICAL REQUIREMENTS:
+1. Use UK-SPECIFIC GUIDELINES for all diagnoses:
+   - DKA: Joint British Diabetes Societies (JBDS) criteria
+   - Respiratory: British Thoracic Society (BTS) guidelines
+   - AKI: NICE CG169
+   - Sepsis: UK Sepsis Trust guidelines
+   
+2. Provide DUAL INTERPRETATION METHODS:
+   - Henderson-Hasselbalch approach (traditional acid-base)
+   - Stewart physiochemical approach (quantitative)
 
-Use clear medical terminology. Be systematic but concise. Focus on clinical utility.`;
+3. Calculate ALL relevant parameters:
+   - Anion gap (AG) = Na+ - (Cl- + HCO3-) [Normal: 8-16 mmol/L]
+   - Delta ratio (ΔAG/ΔHCO3) for mixed disorders
+   - Corrected anion gap for albumin (if albumin <40 g/L)
+   - Strong Ion Difference (SID) = (Na+ + K+) - (Cl- + HCO3-) [Normal: 40-44 mEq/L]
+   - Strong Ion Gap (SIG) for unmeasured anions
+   - A-a gradient (if FiO2 and pO2 available) = [(FiO2×(101.3-6.3)) - (pCO2/0.8)] - pO2 [Normal: <2 kPa on room air]
+   - Corrected calcium (if albumin available) = Ca2+ + 0.02×(40-albumin)
+   - Expected compensation for acid-base disorders
+   - Winter's formula for metabolic acidosis (if applicable)
+
+4. UK DIAGNOSTIC CRITERIA:
+   - DKA (JBDS): pH <7.3 OR HCO3 <15 mmol/L + blood ketones >3 mmol/L (or urine 2+) + blood glucose >11 mmol/L
+   - Respiratory failure: Type 1 (pO2 <8 kPa on air), Type 2 (pO2 <8 kPa + pCO2 >6 kPa)
+   - Hyperlactataemia: >2 mmol/L (sepsis if >4 mmol/L)
+   - Acute hyperkalaemia: >6.5 mmol/L = medical emergency
+
+RESPONSE FORMAT (be thorough and systematic):
+
+**Executive Summary**
+2-3 sentences: Most critical findings and immediate clinical actions needed
+
+**Henderson-Hasselbalch Interpretation**
+- Primary disorder (acidosis/alkalosis, metabolic/respiratory)
+- Degree of compensation (appropriate/inappropriate)
+- Expected vs actual compensation calculations
+- Any mixed disorders identified
+
+**Stewart Physiochemical Interpretation**
+- Strong Ion Difference (SID) analysis
+- Strong Ion Gap (SIG) for unmeasured anions
+- Contribution of weak acids (albumin, phosphate)
+- Free water effect assessment
+
+**Comprehensive Calculations**
+Show ALL workings with normal ranges:
+- Anion gap (corrected if albumin abnormal)
+- Delta ratio (if AG elevated)
+- A-a gradient (if oxygen data available)
+- Corrected calcium (if albumin abnormal)
+- Expected compensation formulas applied
+
+**Differential Diagnoses (Top 3-5)**
+Rank by likelihood based on clinical context. For each:
+- Diagnosis name
+- Supporting evidence from blood gas
+- UK guideline criteria met/not met
+- Additional tests needed
+
+**Immediate Management**
+Evidence-based actions prioritised by urgency:
+- Emergency interventions (if critical values)
+- Specific treatments for identified disorders
+- Further investigations required
+- Monitoring parameters
+- Escalation triggers (HDU/ITU criteria if applicable)
+
+**Red Flags & Safety Netting**
+- Critical values requiring immediate action
+- Life-threatening differentials not to miss
+- When to call for senior help
+
+Use UK terminology (e.g., "ITU" not "ICU", "paracetamol" not "acetaminophen"). Reference specific UK guidelines where applicable.`;
 
         console.log('[Claude] Sending analysis request to Anthropic API');
 
@@ -79,22 +146,22 @@ Use clear medical terminology. Be systematic but concise. Focus on clinical util
             },
             body: JSON.stringify({
                 model: 'claude-sonnet-4-5-20250929',
-                max_tokens: 1500,  // Reduced from 2500 for faster response
+                max_tokens: 3000,  // Increased for comprehensive analysis
                 system: [
                     {
                         type: 'text',
                         text: systemPrompt,
-                        cache_control: { type: 'ephemeral' } // Enable prompt caching
+                        cache_control: { type: 'ephemeral' } // CACHE THIS - reused across calls
                     }
                 ],
                 messages: [
                     {
                         role: 'user',
-                        content: `Analyse these blood gas results concisely:
+                        content: `Analyse this blood gas comprehensively using both Henderson-Hasselbalch and Stewart methods. Apply UK guidelines for all diagnoses.
 
 ${formattedData}
 
-Provide: Executive Summary, Primary Interpretation, Key Calculations, Top 3 Differentials, and Immediate Actions. Be thorough but concise.`
+Provide complete interpretation with all calculations shown, differential diagnoses, and evidence-based management plan.`
                     }
                 ]
             })
@@ -115,8 +182,14 @@ Provide: Executive Summary, Primary Interpretation, Key Calculations, Top 3 Diff
 
         const data = await response.json();
         
-        // Log usage for monitoring
+        // Log usage for monitoring (including cache metrics)
         console.log('[Claude] Usage:', JSON.stringify(data.usage));
+        if (data.usage.cache_creation_input_tokens) {
+            console.log('[Claude] Cache created:', data.usage.cache_creation_input_tokens, 'tokens');
+        }
+        if (data.usage.cache_read_input_tokens) {
+            console.log('[Claude] Cache hit:', data.usage.cache_read_input_tokens, 'tokens (cost savings!)');
+        }
         
         // Extract the response text
         const analysisText = data.content[0].text;
@@ -134,7 +207,8 @@ Provide: Executive Summary, Primary Interpretation, Key Calculations, Top 3 Diff
                 analysis: analysisText,
                 sections: sections,
                 usage: data.usage,
-                model: 'claude-sonnet-4-5'
+                model: 'claude-sonnet-4-5',
+                cacheHit: data.usage.cache_read_input_tokens > 0
             })
         };
 
@@ -153,69 +227,81 @@ Provide: Executive Summary, Primary Interpretation, Key Calculations, Top 3 Diff
 
 // Helper function to format blood gas data for Claude
 function formatBloodGasData(values, clinicalHistory, sampleType) {
-    let formatted = `Sample Type: ${sampleType}\n\n`;
-    formatted += `ESSENTIAL VALUES:\n`;
-    if (values.ph) formatted += `pH: ${values.ph}\n`;
-    if (values.pco2) formatted += `pCO2: ${values.pco2} kPa\n`;
-    if (values.po2) formatted += `pO2: ${values.po2} kPa\n`;
-    if (values.hco3) formatted += `HCO3-: ${values.hco3} mmol/L\n`;
-    if (values.be) formatted += `Base Excess: ${values.be} mmol/L\n`;
+    let formatted = `SAMPLE TYPE: ${sampleType}\n\n`;
+    
+    formatted += `ESSENTIAL BLOOD GAS VALUES:\n`;
+    if (values.ph !== null && values.ph !== undefined) formatted += `  pH: ${values.ph} (normal: 7.35-7.45)\n`;
+    if (values.pco2) formatted += `  pCO₂: ${values.pco2} kPa (normal: 4.7-6.0 kPa)\n`;
+    if (values.po2) formatted += `  pO₂: ${values.po2} kPa (normal: 11-13 kPa on air)\n`;
+    if (values.hco3) formatted += `  HCO₃⁻: ${values.hco3} mmol/L (normal: 22-26 mmol/L)\n`;
+    if (values.be !== null && values.be !== undefined) formatted += `  Base Excess: ${values.be} mmol/L (normal: -2 to +2 mmol/L)\n`;
     
     formatted += `\nELECTROLYTES:\n`;
-    if (values.sodium) formatted += `Na+: ${values.sodium} mmol/L\n`;
-    if (values.potassium) formatted += `K+: ${values.potassium} mmol/L\n`;
-    if (values.chloride) formatted += `Cl-: ${values.chloride} mmol/L\n`;
+    if (values.sodium) formatted += `  Na⁺: ${values.sodium} mmol/L (normal: 135-145 mmol/L)\n`;
+    if (values.potassium) formatted += `  K⁺: ${values.potassium} mmol/L (normal: 3.5-5.0 mmol/L)\n`;
+    if (values.chloride) formatted += `  Cl⁻: ${values.chloride} mmol/L (normal: 98-106 mmol/L)\n`;
     
-    formatted += `\nOTHER VALUES:\n`;
-    if (values.lactate) formatted += `Lactate: ${values.lactate} mmol/L\n`;
-    if (values.glucose) formatted += `Glucose: ${values.glucose} mmol/L\n`;
-    if (values.albumin) formatted += `Albumin: ${values.albumin} g/L\n`;
-    if (values.calcium) formatted += `Ca2+: ${values.calcium} mmol/L\n`;
-    if (values.hb) formatted += `Haemoglobin: ${values.hb} g/L\n`;
-    if (values.fio2) formatted += `FiO2: ${values.fio2}%\n`;
+    formatted += `\nOTHER PARAMETERS:\n`;
+    if (values.lactate) formatted += `  Lactate: ${values.lactate} mmol/L (normal: <2.0 mmol/L)\n`;
+    if (values.glucose) formatted += `  Glucose: ${values.glucose} mmol/L (normal: 3.9-5.6 mmol/L)\n`;
+    if (values.albumin) formatted += `  Albumin: ${values.albumin} g/L (normal: 35-50 g/L)\n`;
+    if (values.calcium) formatted += `  Ca²⁺: ${values.calcium} mmol/L (normal: 2.20-2.60 mmol/L)\n`;
+    if (values.hb) formatted += `  Haemoglobin: ${values.hb} g/L\n`;
+    if (values.fio2) formatted += `  FiO₂: ${values.fio2}%\n`;
     
-    if (clinicalHistory) {
+    if (clinicalHistory && clinicalHistory.trim()) {
         formatted += `\nCLINICAL CONTEXT:\n${clinicalHistory}\n`;
     }
     
     return formatted;
 }
 
-// Helper function to parse analysis into sections
+// Enhanced parsing to handle new section structure
 function parseAnalysisIntoSections(text) {
     const sections = {
         summary: '',
-        primaryInterpretation: '',
+        hendersonHasselbalch: '',
+        stewart: '',
         detailedAnalysis: '',
         differentials: '',
-        recommendations: ''
+        recommendations: '',
+        redFlags: ''
     };
 
-    // Enhanced section parsing with more flexible patterns
-    const summaryMatch = text.match(/(?:Executive Summary|Summary|EXECUTIVE SUMMARY)[\s:]*\n?(.*?)(?=\n\n(?:[A-Z#]|$)|$)/is);
-    const primaryMatch = text.match(/(?:Primary Interpretation|Primary Findings?|PRIMARY INTERPRETATION)[\s:]*\n?(.*?)(?=\n\n(?:[A-Z#]|$)|$)/is);
-    const calculationsMatch = text.match(/(?:Key Calculations?|Calculations?|KEY CALCULATIONS)[\s:]*\n?(.*?)(?=\n\n(?:[A-Z#]|$)|$)/is);
-    const differentialsMatch = text.match(/(?:Top \d+ )?(?:Differential Diagnos[ie]s|Differentials?|DIFFERENTIAL)[\s:]*\n?(.*?)(?=\n\n(?:[A-Z#]|$)|$)/is);
-    const recommendationsMatch = text.match(/(?:Immediate Actions?|Clinical Recommendations?|Recommendations?|IMMEDIATE ACTIONS)[\s:]*\n?(.*?)$/is);
+    // Match patterns for each section (case-insensitive, flexible formatting)
+    const patterns = {
+        summary: /\*?\*?Executive Summary\*?\*?[\s:]*\n?(.*?)(?=\n\n?\*?\*?(?:Henderson|Stewart|Comprehensive|Differential|Immediate|Red Flag|$))/is,
+        hendersonHasselbalch: /\*?\*?Henderson[-\s]?Hasselbalch.*?\*?\*?[\s:]*\n?(.*?)(?=\n\n?\*?\*?(?:Stewart|Comprehensive|Differential|Immediate|Red Flag|$))/is,
+        stewart: /\*?\*?Stewart.*?\*?\*?[\s:]*\n?(.*?)(?=\n\n?\*?\*?(?:Comprehensive|Differential|Immediate|Red Flag|$))/is,
+        detailedAnalysis: /\*?\*?Comprehensive Calculations?\*?\*?[\s:]*\n?(.*?)(?=\n\n?\*?\*?(?:Differential|Immediate|Red Flag|$))/is,
+        differentials: /\*?\*?Differential Diagnos[ie]s.*?\*?\*?[\s:]*\n?(.*?)(?=\n\n?\*?\*?(?:Immediate|Red Flag|$))/is,
+        recommendations: /\*?\*?Immediate Management\*?\*?[\s:]*\n?(.*?)(?=\n\n?\*?\*?(?:Red Flag|$))/is,
+        redFlags: /\*?\*?Red Flags.*?\*?\*?[\s:]*\n?(.*?)$/is
+    };
 
-    if (summaryMatch) sections.summary = summaryMatch[1].trim();
-    if (primaryMatch) sections.primaryInterpretation = primaryMatch[1].trim();
-    if (calculationsMatch) {
-        // Add calculations to detailed analysis
-        sections.detailedAnalysis = calculationsMatch[1].trim();
+    // Extract each section
+    for (const [key, pattern] of Object.entries(patterns)) {
+        const match = text.match(pattern);
+        if (match) {
+            sections[key] = match[1].trim();
+        }
     }
-    if (differentialsMatch) sections.differentials = differentialsMatch[1].trim();
-    if (recommendationsMatch) sections.recommendations = recommendationsMatch[1].trim();
 
-    // Fallback: if no structured sections found, try to split by numbered sections
-    if (!summaryMatch && !primaryMatch && !calculationsMatch) {
-        const lines = text.split('\n\n');
-        if (lines.length >= 3) {
-            sections.summary = lines[0];
-            sections.primaryInterpretation = lines[1];
-            sections.detailedAnalysis = lines.slice(2).join('\n\n');
+    // Combine Henderson and Stewart for primary interpretation display
+    if (sections.hendersonHasselbalch || sections.stewart) {
+        sections.primaryInterpretation = 
+            (sections.hendersonHasselbalch ? '**Henderson-Hasselbalch:**\n' + sections.hendersonHasselbalch + '\n\n' : '') +
+            (sections.stewart ? '**Stewart Method:**\n' + sections.stewart : '');
+    }
+
+    // Fallback: if no structured sections found
+    if (!sections.summary && !sections.hendersonHasselbalch && !sections.stewart) {
+        // Try to extract at least a summary from the first paragraph
+        const paragraphs = text.split('\n\n');
+        if (paragraphs.length > 0) {
+            sections.summary = paragraphs[0];
+            sections.detailedAnalysis = paragraphs.slice(1).join('\n\n');
         } else {
-            // Last resort: put everything in detailed analysis
             sections.detailedAnalysis = text;
         }
     }
