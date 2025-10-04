@@ -52,12 +52,17 @@
             padding: 16px;
             border-top: 1px solid #e5e7eb;
         }
+        /* UPDATED: Much lighter, more readable summary box */
         .summary-box {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            color: white;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: #0c4a6e;
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 20px;
+            border: 2px solid #bae6fd;
+        }
+        .summary-box h3 {
+            color: #075985;
         }
     </style>
 </head>
@@ -65,7 +70,8 @@
     <header class="py-4 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto flex items-center space-x-3">
             <img src="https://iili.io/KGQOvkl.md.png" alt="WMEBEM Logo" class="h-8 w-auto">
-            <h1 class="text-xl font-bold text-gray-700">ABG/VBG Interpreter</h1>
+            <h1 class="text-xl font-bold text-gray-700">ABG/VBG Interpreter Pro</h1>
+            <span class="text-xs text-gray-500 ml-auto">UK Guidelines Compliant</span>
         </div>
     </header>
 
@@ -185,7 +191,7 @@
                 <div id="loading-indicator" class="hidden flex-grow flex-col items-center justify-center text-center text-gray-500">
                     <div class="spinner w-12 h-12 rounded-full border-4 border-gray-200 animate-spin mb-4"></div>
                     <p class="text-md font-semibold text-gray-700">Analysing Blood Gas...</p>
-                    <p class="text-sm">Please wait while we perform consultant-level interpretation.</p>
+                    <p class="text-sm">Performing comprehensive Henderson-Hasselbalch and Stewart analysis...</p>
                 </div>
                 
                 <div id="error-message" class="hidden">
@@ -241,7 +247,7 @@
                 imageInput.click();
             });
 
-            // Form validation - grey out button until required fields filled
+            // Form validation
             function validateForm() {
                 const ph = document.getElementById('ph').value;
                 const pco2 = document.getElementById('pco2').value;
@@ -269,12 +275,11 @@
                 }
             });
 
-            // Analyse button click handler
+            // Analyse button
             analyzeBtn.addEventListener('click', handleAnalysis);
             retryBtn.addEventListener('click', handleAnalysis);
             imageInput.addEventListener('change', handleImageUpload);
             
-            // Initial validation
             validateForm();
 
             // Collect form data
@@ -351,7 +356,7 @@
                 validateForm();
             }
 
-            // Main analysis handler - calls analyze.js directly
+            // Main analysis handler
             async function handleAnalysis() {
                 showPanelContent('loading');
                 
@@ -359,7 +364,6 @@
                     const formData = collectFormData();
                     console.log('Sending data:', formData);
                     
-                    // Set a timeout slightly longer than Netlify's max (26s + 2s buffer = 28s)
                     const controller = new AbortController();
                     const timeoutId = setTimeout(() => controller.abort(), 28000);
                     
@@ -375,7 +379,6 @@
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => ({}));
                         
-                        // Handle specific timeout errors
                         if (response.status === 502 || response.status === 504) {
                             throw new Error('TIMEOUT');
                         }
@@ -386,34 +389,36 @@
                     const analysisResult = await response.json();
                     console.log('Received result:', analysisResult);
                     
+                    // Log cache performance
+                    if (analysisResult.cacheHit) {
+                        console.log('✅ Prompt cache HIT - faster response!');
+                    }
+                    
                     displayAnalysisResults(analysisResult);
                     showPanelContent('results');
                 } catch (error) {
                     console.error('Analysis Error:', error);
                     
-                    // Handle timeout errors with helpful message
                     if (error.name === 'AbortError' || error.message === 'TIMEOUT') {
                         errorContent.innerHTML = `
                             <div class="space-y-3">
                                 <p class="font-semibold text-lg">⏱️ Analysis Timed Out</p>
-                                <p>The analysis took longer than expected (>26 seconds). This occasionally happens with complex analyses.</p>
+                                <p>The comprehensive analysis took longer than expected (>26 seconds).</p>
                                 <div class="bg-red-50 border border-red-200 rounded p-3 mt-3">
-                                    <p class="font-semibold mb-2">Please try one of these:</p>
+                                    <p class="font-semibold mb-2">Please try:</p>
                                     <ul class="list-disc list-inside space-y-1 text-sm">
                                         <li><strong>Retry in a moment</strong> - The AI service may be temporarily busy</li>
-                                        <li><strong>Simplify clinical context</strong> - Reduce the length of clinical history text</li>
-                                        <li><strong>Remove optional values</strong> - Only include essential parameters (pH, pCO₂, HCO₃)</li>
-                                        <li><strong>Try again later</strong> - Wait 1-2 minutes and retry</li>
+                                        <li><strong>Simplify clinical context</strong> - Reduce the length of clinical history</li>
+                                        <li><strong>Remove optional values</strong> - Use only essential parameters</li>
                                     </ul>
                                 </div>
                             </div>`;
                     } else {
-                        // Handle other errors
                         errorContent.innerHTML = `
                             <div class="space-y-2">
                                 <p class="font-semibold">❌ Analysis Error</p>
                                 <p>${error.message || 'Analysis failed. Please try again.'}</p>
-                                <p class="text-sm mt-2">If this persists, please try refreshing the page or contact support.</p>
+                                <p class="text-sm mt-2">If this persists, please refresh the page or contact support.</p>
                             </div>`;
                     }
                     
@@ -450,41 +455,52 @@
                 }
                 
                 if (result.sections) {
+                    // Executive Summary - always shown prominently
                     if (result.sections.summary) {
                         html += `
                             <div class="summary-box">
                                 <h3 class="font-bold text-lg mb-2">📋 Executive Summary</h3>
-                                <div class="text-sm opacity-95">${formatAnalysisText(result.sections.summary)}</div>
+                                <div class="text-sm">${formatAnalysisText(result.sections.summary)}</div>
                             </div>`;
                     }
                     
+                    // Primary Interpretation (Henderson-Hasselbalch + Stewart)
                     if (result.sections.primaryInterpretation) {
-                        html += createSection('primary', '🔍 Primary Interpretation', result.sections.primaryInterpretation);
+                        html += createSection('primary', '🔍 Acid-Base Interpretation', result.sections.primaryInterpretation);
                     }
                     
+                    // Detailed Analysis (Calculations)
                     if (result.sections.detailedAnalysis) {
-                        html += createSection('detailed', '📊 Key Calculations', result.sections.detailedAnalysis);
+                        html += createSection('detailed', '📊 Comprehensive Calculations', result.sections.detailedAnalysis);
                     }
                     
+                    // Differential Diagnoses
                     if (result.sections.differentials) {
-                        html += createSection('differentials', '🩺 Top Differential Diagnoses', result.sections.differentials);
+                        html += createSection('differentials', '🩺 Differential Diagnoses', result.sections.differentials);
                     }
                     
+                    // Immediate Management
                     if (result.sections.recommendations) {
-                        html += createSection('recommendations', '💊 Immediate Actions', result.sections.recommendations);
+                        html += createSection('recommendations', '💊 Immediate Management', result.sections.recommendations);
+                    }
+                    
+                    // Red Flags
+                    if (result.sections.redFlags) {
+                        html += createSection('redflags', '⚠️ Red Flags & Safety Netting', result.sections.redFlags);
                     }
                 }
                 
+                // Fallback if no sections
                 if (!html && result.analysis) {
                     html += `
                         <div class="summary-box">
                             <h3 class="font-bold text-lg mb-2">📋 Analysis</h3>
-                            <div class="text-sm opacity-95">${formatAnalysisText(result.analysis)}</div>
+                            <div class="text-sm">${formatAnalysisText(result.analysis)}</div>
                         </div>`;
                 }
                 
                 if (!html) {
-                    html = '<div class="p-4 bg-yellow-100 text-yellow-700 rounded-lg">Analysis completed but no content could be displayed. Please check the console for details.</div>';
+                    html = '<div class="p-4 bg-yellow-100 text-yellow-700 rounded-lg">Analysis completed but no content could be displayed.</div>';
                 }
                 
                 analysisResults.innerHTML = html;
