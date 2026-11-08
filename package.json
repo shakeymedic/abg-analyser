@@ -1,7 +1,7 @@
 {
   "name": "wmebem-abg-interpreter",
   "version": "2.0.0",
-  "description": "WMEBEM ABG/VBG Interpreter Pro - Enhanced with Perplexity AI",
+  "description": "EM Evidence ABG/VBG Interpreter Pro - Enhanced with Perplexity AI",
   "scripts": {
     "build": "echo 'No build required'"
   },
